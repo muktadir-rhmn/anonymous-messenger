@@ -1,5 +1,6 @@
 package messenger.user;
 
+import messenger.db.DatabaseExecutor;
 import messenger.db.DatabaseManager;
 import messenger.db.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ class SigninResponse {
 @RestController
 public class Signin {
     @Autowired
-    private DatabaseManager databaseManager;
+    private DatabaseExecutor databaseExecutor;
 
     @RequestMapping(value = "/signin", method = RequestMethod.POST)
     public SigninResponse signin(HttpServletResponse response, @RequestBody SigninRequest signin) {
@@ -55,28 +56,24 @@ public class Signin {
     }
 
     private User getUserByEmail(String email) {
-        User user = null;
+        User user = new User();;
 
         String sql = "SELECT id, `name`, email, password, created_at FROM user WHERE email=?";
-        Connection connection = databaseManager.getConnection();
-        try {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, email);
+        int nRows = databaseExecutor.executeQuery(
+                sql,
+                preparedStatement -> {
+                    preparedStatement.setString(1, email);
+                },
+                resultSet -> {
+                    user.id = resultSet.getLong("id");
+                    user.name = resultSet.getString("name");
+                    user.email = resultSet.getString("email");
+                    user.password = resultSet.getString("password");
+                    user.createdAt = resultSet.getLong("created_at");
+                }
+        );
 
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                user = new User();
-                user.id = resultSet.getLong("id");
-                user.name = resultSet.getString("name");
-                user.email = resultSet.getString("email");
-                user.password = resultSet.getString("password");
-                user.createdAt = resultSet.getLong("created_at");
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return user;
+        return nRows == 0 ? null : user;
     }
 
     private void validate(SigninRequest signin) {

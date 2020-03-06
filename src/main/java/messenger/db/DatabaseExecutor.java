@@ -32,13 +32,15 @@ public class DatabaseExecutor {
         return 0;
     }
 
-    public void executeQuery(String sql, ValuesSetter valuesSetter, RowProcessor rowProcessor) {
+    public int executeQuery(String sql, ValuesSetter valuesSetter, RowProcessor rowProcessor) {
+        int nRows = 0;
         Connection connection = databaseManager.getConnection();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             if (valuesSetter != null) valuesSetter.setValues(preparedStatement);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
+                nRows++;
                 rowProcessor.processRow(resultSet);
             }
         } catch (SQLException e) {
@@ -47,10 +49,11 @@ public class DatabaseExecutor {
         finally {
             databaseManager.closeConnection(connection);
         }
+        return nRows;
     }
 
-    public void executeQuery(String sql, RowProcessor rowProcessor) {
-        executeQuery(sql, null, rowProcessor);
+    public int executeQuery(String sql, RowProcessor rowProcessor) {
+        return executeQuery(sql, null, rowProcessor);
     }
 
 }

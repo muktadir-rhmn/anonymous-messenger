@@ -1,5 +1,6 @@
 package messenger.messaging;
 
+import messenger.db.DatabaseExecutor;
 import messenger.db.DatabaseManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ class NewMessageResponse {
 @RestController
 public class NewMessage {
     @Autowired
-    private DatabaseManager databaseManager;
+    private DatabaseExecutor databaseExecutor;
 
     @RequestMapping(value = "/threads/{threadID}/new-message", method = RequestMethod.POST)
     public NewMessageResponse newMessage(@CookieValue("userID") Long userID, @PathVariable Long threadID, @RequestBody NewMessageRequest request) {
@@ -34,7 +35,7 @@ public class NewMessage {
         int sender = (userID == null ? 1 : 0);
 
         String sql = "INSERT INTO message(sender, status, text, created_at) VALUES(?, ?, ?, ?);";
-        databaseManager.executeUpdate(sql, (ps -> {
+        databaseExecutor.executeUpdate(sql, (ps -> {
             ps.setInt(1, sender);
             ps.setString(2, "unseen");
             ps.setString(3, text);
