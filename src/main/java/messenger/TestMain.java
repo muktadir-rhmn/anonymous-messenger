@@ -1,12 +1,15 @@
 package messenger;
 
-import messenger.config.ConfigurationManager;
-import messenger.config.pojos.DatabaseConfiguration;
-import messenger.config.pojos.JWTConfiguration;
+import messenger.user.TokenManager;
+
+import java.util.Map;
 
 public class TestMain {
     public static void main(String[] args) {
-        JWTConfiguration configuration = ConfigurationManager.getJWTConfiguration();
-        System.out.println(configuration.secretKey);
+        TokenManager tokenManager = new TokenManager();
+        String token = tokenManager.generateTokenForInitiator("muktadir");
+        System.out.println(token);
+        Map<String, String> data = tokenManager.verifyToken(token+"kd");
+        System.out.println(data);
     }
 }

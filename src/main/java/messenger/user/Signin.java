@@ -29,6 +29,9 @@ public class Signin {
     @Autowired
     private DatabaseExecutor databaseExecutor;
 
+    @Autowired
+    private TokenManager tokenManager;
+
     @RequestMapping(value = "/signin", method = RequestMethod.POST)
     public SigninResponse signin(HttpServletResponse response, @RequestBody SigninRequest signin) {
         validate(signin);
@@ -42,9 +45,8 @@ public class Signin {
         User user = getUserByEmail(signin.email);
         if (user == null || !user.password.equals(signin.password)) return false;
 
-        response.addCookie(new Cookie("userID", user.id + ""));
-        response.addCookie(new Cookie("name", user.name));
-        response.addCookie(new Cookie("email", user.email));
+        String token = tokenManager.generateTokenForUser(user.id, user.name, user.email);
+        response.addCookie(new Cookie("token", token));
         return true;
     }
 
