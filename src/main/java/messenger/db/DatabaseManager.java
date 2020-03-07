@@ -1,5 +1,7 @@
 package messenger.db;
 
+import messenger.config.ConfigurationManager;
+import messenger.config.pojos.DatabaseConfiguration;
 import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
@@ -8,12 +10,12 @@ import java.sql.SQLException;
 
 @Component
 public class DatabaseManager {
-    private String url = "jdbc:mysql://localhost:3306/messenger";
-    private String userName = "root";
-    private String password = "";
+    private DatabaseConfiguration configuration;
 
     public DatabaseManager() {
         try {
+            configuration = ConfigurationManager.getDatabaseConfiguration();
+
             Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -22,7 +24,7 @@ public class DatabaseManager {
 
     public Connection getConnection() {
         try {
-            return DriverManager.getConnection(url, userName, password);
+            return DriverManager.getConnection(configuration.url, configuration.userName, configuration.password);
         } catch (SQLException e) {
             e.printStackTrace();
         }

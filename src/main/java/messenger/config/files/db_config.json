@@ -1,0 +1,6 @@
+{
+  "vendor": "MySQL",
+  "url": "jdbc:mysql://localhost:3306/messenger",
+  "userName": "root",
+  "password": ""
+}

@@ -49,7 +49,7 @@ public class Signin {
     }
 
     private User getUserByEmail(String email) {
-        User user = new User();;
+        User user = new User();
 
         String sql = "SELECT id, `name`, email, password, created_at FROM user WHERE email=?";
         int nRows = databaseExecutor.executeQuery(
