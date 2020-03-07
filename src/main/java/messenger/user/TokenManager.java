@@ -10,11 +10,12 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 import messenger.config.ConfigurationManager;
 import messenger.config.pojos.JWTConfiguration;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+@Service
 public class TokenManager {
 
     public enum TOKEN_TYPE {
