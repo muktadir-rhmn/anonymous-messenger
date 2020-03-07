@@ -1,13 +1,8 @@
 package messenger.messaging;
 
 import messenger.db.DatabaseExecutor;
-import messenger.db.DatabaseManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 class CreateThreadRequest {
     public String name;

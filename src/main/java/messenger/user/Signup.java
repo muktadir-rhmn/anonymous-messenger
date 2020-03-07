@@ -1,7 +1,6 @@
 package messenger.user;
 
 import messenger.db.DatabaseExecutor;
-import messenger.db.DatabaseManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,7 +1,6 @@
 package messenger.user;
 
 import messenger.db.DatabaseExecutor;
-import messenger.db.DatabaseManager;
 import messenger.db.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,10 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 class SigninRequest {
     public String email;

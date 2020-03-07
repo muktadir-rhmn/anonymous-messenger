@@ -1,14 +1,9 @@
 package messenger.messaging;
 
 import messenger.db.DatabaseExecutor;
-import messenger.db.DatabaseManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
