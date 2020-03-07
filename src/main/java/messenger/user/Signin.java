@@ -34,15 +34,13 @@ public class Signin {
         validate(signin);
         boolean success = manageSignin(response, signin);
 
-        String msg;
-        if (success) msg = "Signin successful";
-        else msg = "Email & password does not match any account";
-        return new SigninResponse("Signin successful");
+        String msg = success ? "Signin successful" : "Email & password does not match any account";
+        return new SigninResponse(msg);
     }
 
     private boolean manageSignin(HttpServletResponse response, SigninRequest signin) {
         User user = getUserByEmail(signin.email);
-        if (user == null) return false;
+        if (user == null || !user.password.equals(signin.password)) return false;
 
         response.addCookie(new Cookie("userID", user.id + ""));
         response.addCookie(new Cookie("name", user.name));
