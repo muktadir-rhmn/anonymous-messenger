@@ -11,7 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class ConfigurationManager {
-    private final static String configurationFileDirectory = "src/main/java/messenger/config/files/";
+    private final static String configurationFileDirectory = "src/main/resources/configuration-files/";
    public static DatabaseConfiguration getDatabaseConfiguration() {
         String fileName = "db_config.json";
        return (DatabaseConfiguration) readConfigurationFromFile(configurationFileDirectory + fileName, DatabaseConfiguration.class);
