@@ -31,11 +31,10 @@ public class Signin {
     @Autowired
     private DatabaseExecutor databaseExecutor;
 
-    @Autowired
-    private TokenManager tokenManager;
+    private TokenManager tokenManager = TokenManager.getInstance();
 
-    @SigninNotRequired
     @RequestMapping(value = "/signin", method = RequestMethod.POST)
+    @SigninNotRequired
     public SigninResponse signin(HttpServletResponse response, @RequestBody SigninRequest signin) {
         validate(signin);
         boolean success = manageSignin(response, signin);

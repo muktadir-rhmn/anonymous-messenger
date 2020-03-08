@@ -1,18 +1,15 @@
 package messenger.auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
 
 
 public class AuthInterceptor extends HandlerInterceptorAdapter {
-    @Autowired
-    private TokenManager tokenManager;
+    private TokenManager tokenManager = TokenManager.getInstance();
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -30,9 +27,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         }
         if (token == null) return false;
 
-        boolean isValid = tokenManager.verifyTokenAndSetRequestAttr(token, request);
-        if (!isValid) return false;
+        boolean isValidToken = tokenManager.verifyTokenAndSetRequestAttr(token, request);
 
-        return true;
+        return isValidToken;
     }
 }

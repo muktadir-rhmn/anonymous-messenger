@@ -1,23 +1,17 @@
 package messenger;
 
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class TestController {
     @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public String test(HttpServletRequest request, @CookieValue(name = "name", required = false) String name, HttpServletResponse response) {
+    public String test(HttpServletRequest request,HttpServletResponse response, @RequestAttribute("userType")String tokenType) {
         System.out.println("Got a request");
-        System.out.println(name);
-        response.addCookie(new Cookie("name", "muktadir"));
-        int secs = 60;
-
+//        String tokenType = (String) request.getAttribute("tokenType");
+        System.out.println(tokenType);
         return "Sorry, I was sleeping";
     }
 }
