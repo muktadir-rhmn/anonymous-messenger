@@ -4,6 +4,7 @@ import messenger.auth.SigninNotRequired;
 import messenger.auth.TokenManager;
 import messenger.db.DatabaseExecutor;
 import messenger.db.models.User;
+import messenger.error.SimpleValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,9 +39,8 @@ public class Signin {
     public SigninResponse signin(HttpServletResponse response, @RequestBody SigninRequest signin) {
         validate(signin);
         boolean success = manageSignin(response, signin);
-
-        String msg = success ? "Signin successful" : "Email & password does not match any account";
-        return new SigninResponse(msg);
+        if (!success) throw new SimpleValidationException("Email & password does not match any account");
+        return new SigninResponse("Signin successful");
     }
 
     private boolean manageSignin(HttpServletResponse response, SigninRequest signin) {
