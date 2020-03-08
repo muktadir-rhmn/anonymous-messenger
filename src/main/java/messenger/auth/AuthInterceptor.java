@@ -13,6 +13,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        if(request.getMethod().equals("OPTIONS")) return true;
         HandlerMethod handlerMethod = (HandlerMethod) handler;
 
         if (handlerMethod.hasMethodAnnotation(SigninNotRequired.class)) return true;
