@@ -1,4 +1,4 @@
-package messenger.user;
+package messenger.auth;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -12,6 +12,7 @@ import messenger.config.pojos.JWTConfiguration;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,20 +68,17 @@ public class TokenManager {
         return token;
     }
 
-    public Map<String, String> verifyToken(String token) {
-        Map<String, String> playloadData = new HashMap<>();
+    public boolean verifyTokenAndSetRequestAttr(String token, HttpServletRequest request) {
         try {
             DecodedJWT decodedToken = tokenVerifier.verify(token);
             Map<String, Claim> claimMap = decodedToken.getClaims();
 
-
             for (String key: claimMap.keySet()) {
-                playloadData.put(key, claimMap.get(key).asString());
+                request.setAttribute(key, claimMap.get(key).asString());
             }
         } catch (JWTCreationException exception){
-            //todo: handle this case
+            return false;
         }
-
-        return playloadData;
+        return true;
     }
 }

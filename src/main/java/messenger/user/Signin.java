@@ -1,5 +1,7 @@
 package messenger.user;
 
+import messenger.auth.SigninNotRequired;
+import messenger.auth.TokenManager;
 import messenger.db.DatabaseExecutor;
 import messenger.db.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,7 @@ public class Signin {
     @Autowired
     private TokenManager tokenManager;
 
+    @SigninNotRequired
     @RequestMapping(value = "/signin", method = RequestMethod.POST)
     public SigninResponse signin(HttpServletResponse response, @RequestBody SigninRequest signin) {
         validate(signin);

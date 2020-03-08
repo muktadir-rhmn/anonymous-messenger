@@ -1,5 +1,6 @@
 package messenger.user;
 
+import messenger.auth.SigninNotRequired;
 import messenger.db.DatabaseExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,7 @@ public class Signup {
     @Autowired
     private DatabaseExecutor databaseExecutor;
 
+    @SigninNotRequired
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     public SignupResponse signup(@RequestBody SignupRequest signup) {
         validate(signup);

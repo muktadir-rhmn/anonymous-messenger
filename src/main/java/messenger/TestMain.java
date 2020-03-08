@@ -1,6 +1,6 @@
 package messenger;
 
-import messenger.user.TokenManager;
+import messenger.auth.TokenManager;
 
 import java.util.Map;
 
