@@ -9,7 +9,7 @@ class NewMessageRequest {
 }
 
 class NewMessageResponse {
-
+    public String message;
 }
 
 @RestController
@@ -18,23 +18,25 @@ public class NewMessage {
     private DatabaseExecutor databaseExecutor;
 
     @RequestMapping(value = "/threads/{threadID}/new-message", method = RequestMethod.POST)
-    public NewMessageResponse newMessage(@CookieValue("userID") Long userID, @PathVariable Long threadID, @RequestBody NewMessageRequest request) {
+    public NewMessageResponse newMessage(@RequestAttribute("userID") Long userID, @PathVariable Long threadID, @RequestBody NewMessageRequest request) {
         validate(request);
         newMessage(userID, threadID, request.text);
 
         NewMessageResponse response = new NewMessageResponse();
+        response.message = "Sent Successfully";
         return response;
     }
 
     private void newMessage(Long userID, long threadID, String text) {
         int sender = (userID == null ? 1 : 0);
 
-        String sql = "INSERT INTO message(sender, status, text, created_at) VALUES(?, ?, ?, ?);";
+        String sql = "INSERT INTO message(sender, thread_id, status, text, created_at) VALUES(?, ?, ?, ?, ?);";
         databaseExecutor.executeUpdate(sql, (ps -> {
             ps.setInt(1, sender);
-            ps.setString(2, "unseen");
-            ps.setString(3, text);
-            ps.setLong(4, System.currentTimeMillis());
+            ps.setLong(2, threadID);
+            ps.setString(3, "unseen");
+            ps.setString(4, text);
+            ps.setLong(5, System.currentTimeMillis());
         }));
     }
 
