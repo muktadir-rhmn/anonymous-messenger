@@ -22,11 +22,8 @@ class SigninRequest {
 class SigninResponse {
     public String message;
     public String token;
-
-    public SigninResponse(String msg, String token) {
-        this.message = msg;
-        this.token = token;
-    }
+    public Long userID;
+    public String userName;
 }
 
 @RestController
@@ -40,17 +37,22 @@ public class Signin {
     @SigninNotRequired
     public SigninResponse signin(@RequestBody SigninRequest signin) {
         validate(signin);
-        String token = manageSignin(signin);
-        if (token == null) throw new SimpleValidationException("Email & password does not match any account");
-        return new SigninResponse("Signin successful", token);
+        SigninResponse response = manageSignin(signin);
+        if (response == null) throw new SimpleValidationException("Email & password does not match any account");
+        return response;
     }
 
-    private String manageSignin(SigninRequest signin) {
+    private SigninResponse manageSignin(SigninRequest signin) {
         User user = getUserByEmail(signin.email);
         if (user == null || !user.password.equals(signin.password)) return null;
 
-        String token = tokenManager.generateTokenForUser(user.id, user.name, user.email);
-        return token;
+        SigninResponse response = new SigninResponse();
+        response.message = "Signin successful";
+        response.token = tokenManager.generateTokenForUser(user.id, user.name, user.email);
+        response.userID = user.id;
+        response.userName = user.name;
+
+        return response;
     }
 
     private User getUserByEmail(String email) {
