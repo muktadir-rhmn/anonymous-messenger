@@ -53,6 +53,7 @@ public class DatabaseExecutor {
     }
 
     public int executeQuery(String sql, RowProcessor rowProcessor) {
+        System.out.println(sql);
         return executeQuery(sql, null, rowProcessor);
     }
 

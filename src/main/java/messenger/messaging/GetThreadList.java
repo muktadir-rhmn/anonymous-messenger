@@ -2,10 +2,7 @@ package messenger.messaging;
 
 import messenger.db.DatabaseExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,7 +27,7 @@ public class GetThreadList {
     private DatabaseExecutor databaseExecutor;
 
     @RequestMapping(value = "/threads", method = RequestMethod.GET)
-    public GetThreadListResponse getThreadList(@CookieValue("userID") String userID) {
+    public GetThreadListResponse getThreadList(@RequestAttribute("userID") String userID) {
         return fetchThreadList(userID);
     }
 
@@ -70,7 +67,7 @@ public class GetThreadList {
         idSetString.setCharAt(idSetString.length() - 1, ')');
 
         String sql = " (SELECT thread_id, max(created_at) as last_message_at FROM message WHERE thread_id IN " + idSetString.toString() + " GROUP BY thread_id) ";
-        sql += "SELECT thread_id, create_at as last_message_at, text as last_message FROM message WHERE (thread_id, created_at) IN " + sql;
+        sql = "SELECT thread_id, created_at as last_message_at, text as last_message FROM message WHERE (thread_id, created_at) IN " + sql;
         databaseExecutor.executeQuery(
                 sql,
                 resultSet -> {

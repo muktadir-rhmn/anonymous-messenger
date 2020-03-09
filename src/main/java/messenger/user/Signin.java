@@ -21,9 +21,11 @@ class SigninRequest {
 
 class SigninResponse {
     public String message;
+    public String token;
 
-    public SigninResponse(String msg) {
-        message = msg;
+    public SigninResponse(String msg, String token) {
+        this.message = msg;
+        this.token = token;
     }
 }
 
@@ -36,20 +38,19 @@ public class Signin {
 
     @RequestMapping(value = "/signin", method = RequestMethod.POST)
     @SigninNotRequired
-    public SigninResponse signin(HttpServletResponse response, @RequestBody SigninRequest signin) {
+    public SigninResponse signin(@RequestBody SigninRequest signin) {
         validate(signin);
-        boolean success = manageSignin(response, signin);
-        if (!success) throw new SimpleValidationException("Email & password does not match any account");
-        return new SigninResponse("Signin successful");
+        String token = manageSignin(signin);
+        if (token == null) throw new SimpleValidationException("Email & password does not match any account");
+        return new SigninResponse("Signin successful", token);
     }
 
-    private boolean manageSignin(HttpServletResponse response, SigninRequest signin) {
+    private String manageSignin(SigninRequest signin) {
         User user = getUserByEmail(signin.email);
-        if (user == null || !user.password.equals(signin.password)) return false;
+        if (user == null || !user.password.equals(signin.password)) return null;
 
         String token = tokenManager.generateTokenForUser(user.id, user.name, user.email);
-        response.addCookie(new Cookie("token", token));
-        return true;
+        return token;
     }
 
     private User getUserByEmail(String email) {
