@@ -1,5 +1,6 @@
-package messenger.auth;
+package messenger.config;
 
+import messenger.auth.AuthInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -8,8 +9,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @EnableWebMvc
 @Configuration
-public class InterceptorConfiguration implements WebMvcConfigurer {
-    public InterceptorConfiguration() {
+public class ApplicationConfiguration implements WebMvcConfigurer {
+    public ApplicationConfiguration() {
         super();
     }
 
