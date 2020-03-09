@@ -1,16 +1,19 @@
 package messenger.messaging;
 
+import messenger.auth.SigninNotRequired;
 import messenger.db.DatabaseExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 class CreateThreadRequest {
-    public String name;
+    public Long userID;
+    public String threadName;
     public String initiatorName;
     public String secretKey;
 }
 
 class CreateThreadResponse {
+    public String message = "success";
 }
 
 
@@ -20,9 +23,10 @@ public class CreateThread {
     private DatabaseExecutor databaseExecutor;
 
     @RequestMapping(value = "/threads/create", method = RequestMethod.POST)
-    public CreateThreadResponse createThread(@CookieValue("userID") String userID, @RequestBody CreateThreadRequest request) {
+    @SigninNotRequired
+    public CreateThreadResponse createThread(@RequestBody CreateThreadRequest request) {
         validate(request);
-        createThread(Long.parseLong(userID), request.name, request.initiatorName, request.secretKey);
+        createThread(request.userID, request.threadName, request.initiatorName, request.secretKey);
 
         return new CreateThreadResponse();
     }

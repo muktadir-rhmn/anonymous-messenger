@@ -16,6 +16,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         if(request.getMethod().equals("OPTIONS")) return true;
         HandlerMethod handlerMethod = (HandlerMethod) handler;
 
+        System.out.println(request.getMethod() + " " + request.getRequestURL());
         if (handlerMethod.hasMethodAnnotation(SigninNotRequired.class)) return true;
 
         String token = null;
