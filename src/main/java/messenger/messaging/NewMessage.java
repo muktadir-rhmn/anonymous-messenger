@@ -30,13 +30,14 @@ public class NewMessage {
     private void newMessage(Long userID, long threadID, String text) {
         int sender = (userID == null ? 1 : 0);
 
-        String sql = "INSERT INTO message(sender, thread_id, status, text, created_at) VALUES(?, ?, ?, ?, ?);";
+        String sql = "INSERT INTO message(sender, thread_id, user_id status, text, created_at) VALUES(?, ?, ?, ?, ?);";
         databaseExecutor.executeUpdate(sql, (ps -> {
             ps.setInt(1, sender);
             ps.setLong(2, threadID);
-            ps.setString(3, "unseen");
-            ps.setString(4, text);
-            ps.setLong(5, System.currentTimeMillis());
+            ps.setLong(3, userID);
+            ps.setString(4, "unseen");
+            ps.setString(5, text);
+            ps.setLong(6, System.currentTimeMillis());
         }));
     }
 
