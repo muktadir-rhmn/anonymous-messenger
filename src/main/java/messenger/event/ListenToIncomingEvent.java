@@ -45,7 +45,7 @@ public class ListenToIncomingEvent {
             response.events.addAll(eventManager.getEventResponses(userID, threadID, listenRequest.lastEventTime, descriptor.eventType, descriptor.data));
         }
         if (response.events.size() > 0) {
-            System.out.println("Event found. So, going to respond without listening");
+            System.out.println("Event found. So, going to respond.");
             deferredResult.setResult(response);
         } else {
             System.out.println("No event found. So, going to listen");
