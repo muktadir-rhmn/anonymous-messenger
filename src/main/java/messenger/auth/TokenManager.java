@@ -52,13 +52,14 @@ public class TokenManager {
         return token;
     }
 
-    public String generateTokenForInitiator(String initiatorName) {
+    public String generateTokenForInitiator(Long threadID, String initiatorName) {
         String token = null;
         try {
             token = JWT.create()
                     .withIssuer(configuration.issuer)
                     .withClaim("userType", USER_TYPE.INITIATOR.toString())
                     .withClaim("initiatorName", initiatorName)
+                    .withClaim("threadID", threadID.toString())
                     .sign(signingAlgorithm);
         } catch (JWTCreationException exception){
             exception.printStackTrace();
