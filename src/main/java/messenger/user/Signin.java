@@ -35,13 +35,12 @@ public class Signin {
     public SigninResponse signin(@RequestBody SigninRequest signin) {
         validate(signin);
         SigninResponse response = manageSignin(signin);
-        if (response == null) throw new SimpleValidationException("Email & password does not match any account");
         return response;
     }
 
     private SigninResponse manageSignin(SigninRequest signin) {
         User user = getUserByEmail(signin.email);
-        if (user == null || !user.password.equals(signin.password)) return null;
+        if (user == null || !user.password.equals(signin.password)) throw new SimpleValidationException("Email & password does not match any account");
 
         SigninResponse response = new SigninResponse();
         response.message = "Signin successful";

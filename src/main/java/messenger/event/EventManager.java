@@ -67,13 +67,12 @@ public class EventManager {
 
         event.createdAt = createdAt;
 
-        String sql = "INSERT INTO event(type, user_id, thread_id, data, created_at) VALUES(?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO event(type, user_id, thread_id, data, created_at) VALUES(?, "+userID+", ?, ?, ?)";
         DatabaseExecutor.getInstance().executeUpdate(sql, preparedStatement -> {
             preparedStatement.setInt(1, eventType);
-            preparedStatement.setLong(2, userID);
-            preparedStatement.setLong(3, threadID);
-            preparedStatement.setString(4, data);
-            preparedStatement.setLong(5, createdAt);
+            preparedStatement.setLong(2, threadID);
+            preparedStatement.setString(3, data);
+            preparedStatement.setLong(4, createdAt);
         });
     }
 

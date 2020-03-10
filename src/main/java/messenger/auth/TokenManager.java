@@ -21,10 +21,8 @@ public class TokenManager {
         return instance;
     }
 
-    public enum USER_TYPE {
-        SIGNED_IN,
-        INITIATOR,
-    }
+    public static final String USER_TYPE_SINGED_IN = "SIGNED_IN";
+    public static final String USER_TYPE_INITIATOR = "INITIATOR";
 
     private JWTConfiguration configuration;
     private Algorithm signingAlgorithm;
@@ -43,7 +41,7 @@ public class TokenManager {
         try {
             token = JWT.create()
                     .withIssuer(configuration.issuer)
-                    .withClaim("userType", USER_TYPE.SIGNED_IN.toString())
+                    .withClaim("userType", USER_TYPE_SINGED_IN)
                     .withClaim("userID", userID.toString())
                     .withClaim("userName", userName)
                     .withClaim("email", email)
@@ -55,14 +53,15 @@ public class TokenManager {
         return token;
     }
 
-    public String generateTokenForInitiator(Long threadID, String initiatorName) {
+    public String generateTokenForInitiator(Long userID, Long threadID, String initiatorName) {
         String token = null;
         try {
             token = JWT.create()
                     .withIssuer(configuration.issuer)
-                    .withClaim("userType", USER_TYPE.INITIATOR.toString())
+                    .withClaim("userType", USER_TYPE_INITIATOR)
                     .withClaim("initiatorName", initiatorName)
                     .withClaim("threadID", threadID.toString())
+                    .withClaim("userID", userID.toString())
                     .sign(signingAlgorithm);
         } catch (JWTCreationException exception){
             exception.printStackTrace();

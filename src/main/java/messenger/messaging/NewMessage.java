@@ -1,5 +1,6 @@
 package messenger.messaging;
 
+import messenger.auth.TokenManager;
 import messenger.db.DatabaseExecutor;
 import messenger.event.EventManager;
 import messenger.event.NewMessageEvent;
@@ -23,9 +24,10 @@ public class NewMessage {
     private EventManager eventManager;
 
     @RequestMapping(value = "/threads/{threadID}/new-message", method = RequestMethod.POST)
-    public NewMessageResponse newMessage(@RequestAttribute("userID") Long userID, @PathVariable Long threadID, @RequestBody NewMessageRequest request) {
+    public NewMessageResponse newMessage(@RequestAttribute("userType") String userType, @RequestAttribute(value = "userID", required = false) Long userID, @PathVariable Long threadID, @RequestBody NewMessageRequest request) {
+        System.out.println("newMessage: userID" + userID);
         validate(request);
-        newMessage(userID, threadID, request.text);
+        newMessage(userType, userID, threadID, request.text);
         eventManager.receive(new NewMessageEvent(userID, threadID));
 
         NewMessageResponse response = new NewMessageResponse();
@@ -33,17 +35,16 @@ public class NewMessage {
         return response;
     }
 
-    private void newMessage(Long userID, long threadID, String text) {
-        int sender = (userID == null ? 1 : 0);
+    private void newMessage(String userType, Long userID, long threadID, String text) {
+        int sender = (userType.equals(TokenManager.USER_TYPE_INITIATOR)? 1 : 0);
 
-        String sql = "INSERT INTO message(sender, thread_id, user_id, status, text, created_at) VALUES(?, ?, ?, ?, ?, ?);";
+        String sql = "INSERT INTO message(sender, thread_id, user_id, status, text, created_at) VALUES(?, ?, "+userID+", ?, ?, ?);";
         databaseExecutor.executeUpdate(sql, (ps -> {
             ps.setInt(1, sender);
             ps.setLong(2, threadID);
-            ps.setLong(3, userID);
-            ps.setString(4, "unseen");
-            ps.setString(5, text);
-            ps.setLong(6, System.currentTimeMillis());
+            ps.setString(3, "unseen");
+            ps.setString(4, text);
+            ps.setLong(5, System.currentTimeMillis());
         }));
     }
 
