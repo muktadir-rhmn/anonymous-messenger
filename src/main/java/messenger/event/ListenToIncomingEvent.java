@@ -14,7 +14,7 @@ class ListenableEventDescriptor {
 }
 
 class ListenRequest {
-    public List<ListenableEventDescriptor> requestedEvents;
+    public List<ListenableEventDescriptor> requestedEvents = new LinkedList<>();
 }
 
 class ListenResponse {
@@ -33,22 +33,25 @@ public class ListenToIncomingEvent {
 
     @RequestMapping(value = "/listen", method = RequestMethod.POST)
     public DeferredResult<ListenResponse> listen(
-            @RequestAttribute("userID") Long userID,
-            @RequestAttribute("threadID") Long threadID,
+            @RequestAttribute(value = "userID", required = false) Long userID,
+            @RequestAttribute(value = "threadID", required = false) Long threadID,
             @RequestBody ListenRequest listenRequest
     ) {
         DeferredResult<ListenResponse> deferredResult = new DeferredResult<>(LISTEN_TIME_OUT_MILLIS);
 
         ListenResponse response = new ListenResponse();
+        System.out.println("checking e");
         for (ListenableEventDescriptor descriptor: listenRequest.requestedEvents) {
             response.eventResponse.addAll(eventManager.getEventResponses(userID, threadID, descriptor.data));
         }
         if (response.eventResponse.size() > 0) {
+            System.out.println("Event found. So, going to respond.");
             deferredResult.setResult(response);
-        }
-
-        for (ListenableEventDescriptor descriptor: listenRequest.requestedEvents) {
-            eventProcessor.addEventListener(userID, threadID, descriptor.eventType, deferredResult, descriptor.data);
+        } else {
+            System.out.println("No event found. So, going to listen");
+            for (ListenableEventDescriptor descriptor: listenRequest.requestedEvents) {
+                eventProcessor.addEventListener(userID, threadID, descriptor.eventType, deferredResult, descriptor.data);
+            }
         }
 
         return deferredResult;

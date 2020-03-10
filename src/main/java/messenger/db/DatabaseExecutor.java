@@ -27,7 +27,7 @@ public class DatabaseExecutor {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(sql);
-            valuesSetter.setValues(preparedStatement);
+            if (valuesSetter != null) valuesSetter.setValues(preparedStatement);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             databaseManager.closeConnection(connection);
@@ -38,6 +38,10 @@ public class DatabaseExecutor {
             databaseManager.closeConnection(connection);
         }
         return 0;
+    }
+
+    public int executeUpdate(String sql) {
+        return executeUpdate(sql, null);
     }
 
     public int executeQuery(String sql, ValuesSetter valuesSetter, RowProcessor rowProcessor) {

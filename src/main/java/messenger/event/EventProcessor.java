@@ -28,15 +28,18 @@ class EventListenerDescriptor {
 @Service
 public class EventProcessor implements Runnable{
     private ConcurrentLinkedQueue<Event> queue = new ConcurrentLinkedQueue<>();
-    private ConcurrentHashMap<Integer, ConcurrentLinkedQueue<EventListenerDescriptor>> listeners = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, ConcurrentLinkedQueue<EventListenerDescriptor>> listeners = new ConcurrentHashMap<>(); //todo: move this to event manager
 
     public EventProcessor() {
         Thread thread = new Thread(this);
         thread.start();
+
+        listeners.put(0, new ConcurrentLinkedQueue<>()); //for new message event
     }
 
     public synchronized void enqueueEvent(Event event) {
         queue.add(event);
+        System.out.println("Enqueued event and waking up processor");
         notifyAll();
     }
 
@@ -47,13 +50,18 @@ public class EventProcessor implements Runnable{
     private synchronized void processEvent() {
         while (queue.size() == 0) {
             try {
+                System.out.println("EventProcessor: no event found. so going to sleep");
                 wait();
+                System.out.println("EventProcessor: waking up from sleep");
             } catch (InterruptedException e) {
+                System.out.println("EventProcessor: interrupted from sleep");
                 e.printStackTrace();
             }
         }
 
         Event event = queue.poll();
+        System.out.println("EventProcessor: Event found in event queue: " + event.getClass().getSimpleName());
+
         int eventType = event.getEventType();
         ConcurrentLinkedQueue<EventListenerDescriptor> eventListeners = listeners.get(eventType);
         while (!eventListeners.isEmpty()){
@@ -76,7 +84,9 @@ public class EventProcessor implements Runnable{
 
     @Override
     public void run() {
+        System.out.println("Starting Event processor thread");
         while (true) {
+            System.out.println("Going to process one event");
             processEvent();
         }
     }

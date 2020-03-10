@@ -1,6 +1,8 @@
 package messenger.messaging;
 
 import messenger.db.DatabaseExecutor;
+import messenger.event.EventManager;
+import messenger.event.NewMessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +19,14 @@ public class NewMessage {
     @Autowired
     private DatabaseExecutor databaseExecutor;
 
+    @Autowired
+    private EventManager eventManager;
+
     @RequestMapping(value = "/threads/{threadID}/new-message", method = RequestMethod.POST)
     public NewMessageResponse newMessage(@RequestAttribute("userID") Long userID, @PathVariable Long threadID, @RequestBody NewMessageRequest request) {
         validate(request);
         newMessage(userID, threadID, request.text);
+        eventManager.receive(new NewMessageEvent(userID, threadID));
 
         NewMessageResponse response = new NewMessageResponse();
         response.message = "Sent Successfully";

@@ -29,22 +29,31 @@ public class NewMessageEvent extends Event {
     }
 
     @Override
+    public void invalidatePreviousEvents() {
+        int eventType = EventManager.getInstance().getEventType(this);
+        String sql = "UPDATE event SET invalid=1 WHERE type=" + eventType + " AND user_id=" + userID;
+        DatabaseExecutor.getInstance().executeUpdate(sql);
+    }
+
+
+    @Override
     public Object generateResponseData(EventDescriptor eventDescriptor, Map<String, Object> data) {
-        Long lastMessageID = (Long) data.get("lastMessageID");
+        Integer lastMessageID = (Integer) data.get("lastMessageID");
         if (lastMessageID == null) throw new SimpleValidationException("newMessageEvent listen request must contain lastMessageID");
 
-        String sql = "SELECT id, sender, status, text, seen_at, created_at as sent_at FROM message ";
-        sql += " WHERE thread_id=" + eventDescriptor.threadID + " AND id>" + lastMessageID;
+        String sql = "SELECT id, sender, thread_id, status, text, seen_at, created_at as sent_at FROM message ";
+        sql += " WHERE user_id=" + eventDescriptor.userID + " AND id>" + lastMessageID;
+        sql += " ORDER BY sent_at DESC;";
 
         List<Message> messages = new LinkedList<>();
         DatabaseExecutor.getInstance().executeQuery(sql, resultSet -> {
             Message message = new Message();
             message.id = resultSet.getLong("id");
             message.sender = resultSet.getInt("sender");
+            message.threadID = resultSet.getLong("thread_id");
             message.status = resultSet.getString("status");
             message.text = resultSet.getString("text");
             message.seenAt = resultSet.getLong("seen_at");
-            System.out.println(message.seenAt);
             message.sentAt = resultSet.getLong("sent_at");
 
             messages.add(message);

@@ -25,14 +25,16 @@ public class EventManager {
      * But not used, as it will tightly couple event type with the class name. So, if we need to change an event name,
      * we will have to touch database;
      */
-    private static Map<Class, Integer> eventType;
+    private static Map<String, Integer> eventType;
     static {
         eventType = new HashMap<>(10);
-        eventType.put(NewMessageEvent.class, 0);
+        eventType.put(NewMessageEvent.class.getSimpleName(), 0);
     }
 
     public int getEventType(Event event) {
-        return eventType.get(this.getClass());
+        Integer type = eventType.get(event.getClass().getSimpleName());
+        System.out.println(type);
+        return type;
     }
 
     private static Map<Integer, EventResponseGenerator> eventInstance;
@@ -51,6 +53,7 @@ public class EventManager {
     private DatabaseExecutor databaseExecutor;
 
     public void receive(Event event) {
+        event.invalidatePreviousEvents();
         storeInDB(event);
         eventProcessor.enqueueEvent(event);
     }
@@ -74,10 +77,10 @@ public class EventManager {
 
 
     public List<Object> getEventResponses(Long userID, Long threadID, Map<String, Object> data) {
-        Long lastEventID = (Long) data.get("lastEventID");
+        Integer lastEventID = (Integer) data.get("lastEventID");
         if (lastEventID == null) throw new SimpleValidationException("Listener request must contain lastEventID");
 
-        String sql = "SELECT id, type, data, created_at FROM event WHERE id > " + lastEventID + " AND ";
+        String sql = "SELECT id, type, data, created_at FROM event WHERE id > " + lastEventID + " AND invalid=0 AND ";
         if (userID != null) sql += " user_id=" + userID;
         else if (threadID != null) sql += " thread_id=" + threadID;
         else throw new RuntimeException("Either userID or threadID must be non-Null");
@@ -86,6 +89,8 @@ public class EventManager {
         databaseExecutor.executeQuery(sql, resultSet -> {
             EventDescriptor descriptor = new EventDescriptor();
             descriptor.id = resultSet.getLong("id");
+            descriptor.threadID = threadID;
+            descriptor.userID = userID;
             descriptor.type= resultSet.getInt("type");
             descriptor.data = resultSet.getString("data");
             descriptor.createdAt = resultSet.getLong("created_at");
