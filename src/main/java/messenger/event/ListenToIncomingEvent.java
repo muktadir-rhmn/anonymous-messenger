@@ -19,7 +19,7 @@ class ListenRequest {
 }
 
 class ListenResponse {
-    public List<Object> eventResponse = new LinkedList<>();
+    public List<Object> events = new LinkedList<>();
 }
 
 @RestController
@@ -43,9 +43,9 @@ public class ListenToIncomingEvent {
         ListenResponse response = new ListenResponse();
         System.out.println("checking e");
         for (ListenableEventDescriptor descriptor: listenRequest.requestedEvents) {
-            response.eventResponse.addAll(eventManager.getEventResponses(userID, threadID, listenRequest.lastEventID, descriptor.eventType, descriptor.data));
+            response.events.addAll(eventManager.getEventResponses(userID, threadID, listenRequest.lastEventID, descriptor.eventType, descriptor.data));
         }
-        if (response.eventResponse.size() > 0) {
+        if (response.events.size() > 0) {
             System.out.println("Event found. So, going to respond.");
             deferredResult.setResult(response);
         } else {

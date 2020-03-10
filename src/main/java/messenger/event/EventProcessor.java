@@ -77,7 +77,7 @@ public class EventProcessor implements Runnable{
             Object response = event.generateResponseData(eventDescriptor, descriptor.data);
 
             ListenResponse listenResponse = new ListenResponse();
-            listenResponse.eventResponse.add(response);
+            listenResponse.events.add(response);
             descriptor.deferredResult.setResult(listenResponse);
         }
     }

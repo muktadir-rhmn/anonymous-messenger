@@ -7,21 +7,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-class ThreadDescriptor {
+class ThreadDescriptor implements Comparable<ThreadDescriptor>{
     public Long id;
     public String name;
     public String initiatorName;
     public String lastMessage;
     public Long lastActiveAt;
+
+    @Override
+    public int compareTo(ThreadDescriptor o) {
+        if (lastActiveAt == null) return 1;
+        return -lastActiveAt.compareTo(o.lastActiveAt);
+    }
 }
 
 class GetThreadListResponse {
-    public List<ThreadDescriptor> threads = new LinkedList<>();
+    public List<ThreadDescriptor> threads = new ArrayList<>();
 }
 
 @RestController
@@ -54,6 +57,7 @@ public class GetThreadList {
                 }
         );
         populateLastMessageInfo(response.threads);
+        Collections.sort(response.threads);
 
         return response;
     }
@@ -71,7 +75,6 @@ public class GetThreadList {
 
         String sql = " (SELECT thread_id, max(created_at) as last_message_at FROM message WHERE thread_id IN " + idSetString.toString() + " GROUP BY thread_id) ";
         sql = "SELECT thread_id, created_at as last_message_at, text as last_message FROM message WHERE (thread_id, created_at) IN " + sql;
-        sql += " ORDER BY last_message_at DESC";
         databaseExecutor.executeQuery(
                 sql,
                 resultSet -> {

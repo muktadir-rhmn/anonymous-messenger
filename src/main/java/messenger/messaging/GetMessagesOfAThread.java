@@ -32,7 +32,7 @@ public class GetMessagesOfAThread {
         List<Message> messages = new LinkedList<>();
 
         String sql = "SELECT id, sender, status, text, seen_at, created_at as sent_at FROM message WHERE thread_id=?";
-        sql += " ORDER BY last_message_at DESC";
+        sql += " ORDER BY sent_at ASC";
         databaseExecutor.executeQuery(sql,
                 preparedStatement -> {
                     preparedStatement.setLong(1, threadID);
