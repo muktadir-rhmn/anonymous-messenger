@@ -20,17 +20,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
         String token = null;
         token = request.getHeader("token");
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies == null) {
-//            System.out.println("no cookies found. so not logged in");
-//            return false;
-//        }
-//        for (int i = 0; i < cookies.length; i++) {
-//            if (cookies[i].getName().equals("token")){
-//                token = cookies[i].getValue();
-//                break;
-//            }
-//        }
+
         if (token == null) {
             System.out.println("No token found in cookies, so not logged in");
             return false;
