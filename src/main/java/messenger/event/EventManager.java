@@ -76,11 +76,11 @@ public class EventManager {
     }
 
 
-    public List<Object> getEventResponses(Long userID, Long threadID, Map<String, Object> data) {
-        Integer lastEventID = (Integer) data.get("lastEventID");
+    public List<Object> getEventResponses(Long userID, Long threadID, Long lastEventID, Integer eventType, Map<String, Object> data) {
         if (lastEventID == null) throw new SimpleValidationException("Listener request must contain lastEventID");
+        if (userID == null && threadID == null) throw new SimpleValidationException("Either userID or threadID must not be empty");
 
-        String sql = "SELECT id, type, data, created_at FROM event WHERE id > " + lastEventID + " AND invalid=0 AND ";
+        String sql = "SELECT id, type, data, created_at FROM event WHERE id > " + lastEventID + " AND invalid=0 AND type=" + eventType + " AND";
         if (userID != null) sql += " user_id=" + userID;
         else if (threadID != null) sql += " thread_id=" + threadID;
         else throw new RuntimeException("Either userID or threadID must be non-Null");
