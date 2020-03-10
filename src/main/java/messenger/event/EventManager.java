@@ -65,6 +65,8 @@ public class EventManager {
         String data = event.encodeEventData();
         long createdAt = System.currentTimeMillis();
 
+        event.createdAt = createdAt;
+
         String sql = "INSERT INTO event(type, user_id, thread_id, data, created_at) VALUES(?, ?, ?, ?, ?)";
         DatabaseExecutor.getInstance().executeUpdate(sql, preparedStatement -> {
             preparedStatement.setInt(1, eventType);
@@ -76,11 +78,11 @@ public class EventManager {
     }
 
 
-    public List<Object> getEventResponses(Long userID, Long threadID, Long lastEventID, Integer eventType, Map<String, Object> data) {
-        if (lastEventID == null) throw new SimpleValidationException("Listener request must contain lastEventID");
+    public List<Object> getEventResponses(Long userID, Long threadID, Long lastEventTime, Integer eventType, Map<String, Object> data) {
+        if (lastEventTime == null) throw new SimpleValidationException("Listener request must contain lastEventTime");
         if (userID == null && threadID == null) throw new SimpleValidationException("Either userID or threadID must not be empty");
 
-        String sql = "SELECT id, type, data, created_at FROM event WHERE id > " + lastEventID + " AND invalid=0 AND type=" + eventType + " AND";
+        String sql = "SELECT id, type, data, created_at FROM event WHERE created_at > " + lastEventTime + " AND invalid=0 AND type=" + eventType + " AND";
         if (userID != null) sql += " user_id=" + userID;
         else if (threadID != null) sql += " thread_id=" + threadID;
         else throw new RuntimeException("Either userID or threadID must be non-Null");
@@ -95,7 +97,7 @@ public class EventManager {
             descriptor.data = resultSet.getString("data");
             descriptor.createdAt = resultSet.getLong("created_at");
 
-            Object response = getResponseGenerator(descriptor.type).generateResponseData(descriptor, data);
+            Object response = getResponseGenerator(descriptor.type).generateResponseData(descriptor, descriptor.createdAt, data);
             responses.add(response);
         });
 

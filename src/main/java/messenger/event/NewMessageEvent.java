@@ -8,8 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-class NewMessageEventResponse{
-    public int eventType;
+class NewMessageEventResponse {
     public List<Message> messages;
 }
 
@@ -37,7 +36,7 @@ public class NewMessageEvent extends Event {
 
 
     @Override
-    public Object generateResponseData(EventDescriptor eventDescriptor, Map<String, Object> data) {
+    public EventResponse generateResponseData(EventDescriptor eventDescriptor, Long createdAt, Map<String, Object> data) {
         Integer lastMessageID = (Integer) data.get("lastMessageID");
         if (lastMessageID == null) throw new SimpleValidationException("newMessageEvent listen request must contain lastMessageID");
 
@@ -60,9 +59,10 @@ public class NewMessageEvent extends Event {
         });
 
         NewMessageEventResponse response = new NewMessageEventResponse();
-        response.eventType = EventManager.getInstance().getEventType(this);
         response.messages = messages;
-        return response;
+
+        int eventType = EventManager.getInstance().getEventType(this);
+        return new EventResponse(eventType, response, createdAt);
     }
 }
 

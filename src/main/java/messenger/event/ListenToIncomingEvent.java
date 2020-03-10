@@ -14,7 +14,7 @@ class ListenableEventDescriptor {
 }
 
 class ListenRequest {
-    public Long lastEventID;
+    public Long lastEventTime;
     public List<ListenableEventDescriptor> requestedEvents = new LinkedList<>();
 }
 
@@ -43,7 +43,7 @@ public class ListenToIncomingEvent {
         ListenResponse response = new ListenResponse();
         System.out.println("checking e");
         for (ListenableEventDescriptor descriptor: listenRequest.requestedEvents) {
-            response.events.addAll(eventManager.getEventResponses(userID, threadID, listenRequest.lastEventID, descriptor.eventType, descriptor.data));
+            response.events.addAll(eventManager.getEventResponses(userID, threadID, listenRequest.lastEventTime, descriptor.eventType, descriptor.data));
         }
         if (response.events.size() > 0) {
             System.out.println("Event found. So, going to respond.");
