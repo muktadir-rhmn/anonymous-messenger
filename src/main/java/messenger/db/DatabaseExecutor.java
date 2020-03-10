@@ -12,7 +12,15 @@ import java.sql.SQLException;
 @Component
 public class DatabaseExecutor {
     @Autowired
-    DatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
+
+    private static DatabaseExecutor databaseExecutor;
+    public static DatabaseExecutor getInstance(){
+        return databaseExecutor;
+    }
+    public DatabaseExecutor() {
+        DatabaseExecutor.databaseExecutor = this;
+    }
 
     public int executeUpdate(String sql, ValuesSetter valuesSetter) {
         Connection connection = databaseManager.getConnection();

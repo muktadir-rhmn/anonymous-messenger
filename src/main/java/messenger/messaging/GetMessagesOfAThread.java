@@ -1,6 +1,7 @@
 package messenger.messaging;
 
 import messenger.db.DatabaseExecutor;
+import messenger.db.models.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,14 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-class Message {
-    public Long id;
-    public int sender;
-    public String text;
-    public String status;
-    public Long seenAt;
-    public Long sentAt;
-}
 
 class GetMessagesOfAThreadResponse {
     public List<Message> messages = new LinkedList<>();

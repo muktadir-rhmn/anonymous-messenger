@@ -12,6 +12,9 @@ import messenger.config.pojos.JWTConfiguration;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
+/**
+ * every value in the claim of tokens must be string
+ */
 public class TokenManager {
     private static final TokenManager instance = new TokenManager();
     public static TokenManager getInstance() {
