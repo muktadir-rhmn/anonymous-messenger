@@ -11,7 +11,7 @@ class EventListenerDescriptor {
     public DeferredResult<ListenResponse> deferredResult;
 
     public Integer eventType;
-    public Long userID;
+    public long userID;
     public Long threadID;
     public Map<String, Object> data;
 
@@ -62,18 +62,19 @@ public class EventProcessor implements Runnable{
         Event event = queue.poll();
         System.out.println("EventProcessor: Event found in event queue: " + event.getClass().getSimpleName());
 
+
         int eventType = event.getEventType();
         ConcurrentLinkedQueue<EventListenerDescriptor> eventListeners = listeners.get(eventType);
         while (!eventListeners.isEmpty()){
             EventListenerDescriptor descriptor = eventListeners.poll();
+
             if (descriptor.deferredResult.isSetOrExpired()) continue;
 
             if (descriptor.threadID != null && !descriptor.threadID.equals(event.threadID)) continue;
-            if (descriptor.userID != null && !descriptor.userID.equals(event.userID)) continue;
 
             EventDescriptor eventDescriptor = new EventDescriptor();
-            event.threadID = descriptor.threadID;
-            event.userID = descriptor.userID;
+            eventDescriptor.threadID = descriptor.threadID;
+            eventDescriptor.userID = descriptor.userID;
             Object response = event.generateResponseData(eventDescriptor, event.createdAt, descriptor.data);
 
             ListenResponse listenResponse = new ListenResponse();

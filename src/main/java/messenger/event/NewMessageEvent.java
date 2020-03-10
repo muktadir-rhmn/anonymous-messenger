@@ -43,6 +43,7 @@ public class NewMessageEvent extends Event {
         String sql = "SELECT id, sender, thread_id, status, text, seen_at, created_at as sent_at FROM message ";
         sql += " WHERE user_id=" + eventDescriptor.userID + " AND id>" + lastMessageID;
         sql += " ORDER BY sent_at DESC;";
+        if (eventDescriptor.userID == null) throw new RuntimeException("userID");
 
         List<Message> messages = new LinkedList<>();
         DatabaseExecutor.getInstance().executeQuery(sql, resultSet -> {

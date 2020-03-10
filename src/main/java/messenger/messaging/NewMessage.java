@@ -25,7 +25,6 @@ public class NewMessage {
 
     @RequestMapping(value = "/threads/{threadID}/new-message", method = RequestMethod.POST)
     public NewMessageResponse newMessage(@RequestAttribute("userType") String userType, @RequestAttribute(value = "userID", required = false) Long userID, @PathVariable Long threadID, @RequestBody NewMessageRequest request) {
-        System.out.println("newMessage: userID" + userID);
         validate(request);
         newMessage(userType, userID, threadID, request.text);
         eventManager.receive(new NewMessageEvent(userID, threadID));

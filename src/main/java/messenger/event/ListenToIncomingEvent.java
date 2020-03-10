@@ -34,19 +34,18 @@ public class ListenToIncomingEvent {
 
     @RequestMapping(value = "/listen", method = RequestMethod.POST)
     public DeferredResult<ListenResponse> listen(
-            @RequestAttribute(value = "userID", required = false) Long userID,
+            @RequestAttribute(value = "userID") Long userID,
             @RequestAttribute(value = "threadID", required = false) Long threadID,
             @RequestBody ListenRequest listenRequest
     ) {
         DeferredResult<ListenResponse> deferredResult = new DeferredResult<>(LISTEN_TIME_OUT_MILLIS);
 
         ListenResponse response = new ListenResponse();
-        System.out.println("checking e");
         for (ListenableEventDescriptor descriptor: listenRequest.requestedEvents) {
             response.events.addAll(eventManager.getEventResponses(userID, threadID, listenRequest.lastEventTime, descriptor.eventType, descriptor.data));
         }
         if (response.events.size() > 0) {
-            System.out.println("Event found. So, going to respond.");
+            System.out.println("Event found. So, going to respond without listening");
             deferredResult.setResult(response);
         } else {
             System.out.println("No event found. So, going to listen");
