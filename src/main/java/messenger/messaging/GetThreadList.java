@@ -71,6 +71,7 @@ public class GetThreadList {
 
         String sql = " (SELECT thread_id, max(created_at) as last_message_at FROM message WHERE thread_id IN " + idSetString.toString() + " GROUP BY thread_id) ";
         sql = "SELECT thread_id, created_at as last_message_at, text as last_message FROM message WHERE (thread_id, created_at) IN " + sql;
+        sql += " ORDER BY last_message_at DESC";
         databaseExecutor.executeQuery(
                 sql,
                 resultSet -> {

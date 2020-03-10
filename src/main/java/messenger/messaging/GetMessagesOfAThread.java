@@ -32,6 +32,7 @@ public class GetMessagesOfAThread {
         List<Message> messages = new LinkedList<>();
 
         String sql = "SELECT id, sender, status, text, seen_at, created_at as sent_at FROM message WHERE thread_id=?";
+        sql += " ORDER BY last_message_at DESC";
         databaseExecutor.executeQuery(sql,
                 preparedStatement -> {
                     preparedStatement.setLong(1, threadID);
@@ -44,7 +45,6 @@ public class GetMessagesOfAThread {
                     message.status = resultSet.getString("status");
                     message.text = resultSet.getString("text");
                     message.seenAt = resultSet.getLong("seen_at");
-                    System.out.println(message.seenAt);
                     message.sentAt = resultSet.getLong("sent_at");
 
                     messages.add(message);
