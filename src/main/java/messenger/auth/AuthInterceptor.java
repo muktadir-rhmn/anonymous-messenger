@@ -12,17 +12,16 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if(request.getMethod().equals("OPTIONS")) return true;
+        if(request.getMethod().equals("OPTIONS")) return true; //for CORS
+
         HandlerMethod handlerMethod = (HandlerMethod) handler;
 
         System.out.println(request.getMethod() + " " + request.getRequestURL());
         if (handlerMethod.hasMethodAnnotation(SigninNotRequired.class)) return true;
 
-        String token = null;
-        token = request.getHeader("token");
+        String token = request.getHeader("token");
 
         if (token == null) {
-            System.out.println("No token found in cookies, so not logged in");
             return false;
         }
 

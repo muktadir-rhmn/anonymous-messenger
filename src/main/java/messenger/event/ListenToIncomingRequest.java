@@ -23,7 +23,7 @@ class ListenResponse {
 }
 
 @RestController
-public class ListenToIncomingEvent {
+public class ListenToIncomingRequest {
     private final static long LISTEN_TIME_OUT_MILLIS = 60000;
 
     @Autowired
