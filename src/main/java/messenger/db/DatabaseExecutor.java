@@ -29,7 +29,7 @@ public class DatabaseExecutor {
         try {
             preparedStatement = connection.prepareStatement(sql);
             if (valuesSetter != null) valuesSetter.setValues(preparedStatement);
-            preparedStatement.executeUpdate();
+            return preparedStatement.executeUpdate();
         } catch (SQLException e) {
             databaseManager.closeConnection(connection);
 

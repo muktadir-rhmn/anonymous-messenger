@@ -32,15 +32,16 @@ public class SeeMessage {
             @PathVariable Long threadID,
             @PathVariable Long messageID
     ) {
-        setMessageStatusToSeen(userType, userID, threadID, messageID);
-        eventManager.receive(new MessageSeenEvent(userType, userID, threadID, messageID));
+        long seenAt = System.currentTimeMillis();
+        setMessageStatusToSeen(userType, userID, threadID, messageID, seenAt);
+        eventManager.receive(new MessageSeenEvent(userType, userID, threadID, messageID, seenAt));
         return new SeeMessageResponse("Successful");
     }
 
-    private void setMessageStatusToSeen(String userType, long userID, long threadID, long messageID) {
+    private void setMessageStatusToSeen(String userType, long userID, long threadID, long messageID, long seenAt) {
         int sender = (userType.equals(TokenManager.USER_TYPE_INITIATOR)? 0 : 1);
 
-        String sql = "UPDATE  message SET status='seen', seen_at = " + System.currentTimeMillis() + " WHERE id<=? AND sender=? AND user_id=? AND thread_id=?";
+        String sql = "UPDATE  message SET status='seen', seen_at = " + seenAt + " WHERE id<=? AND sender=? AND user_id=? AND thread_id=?";
         int rowAffected = databaseExecutor.executeUpdate(sql, preparedStatement -> {
             preparedStatement.setLong(1, messageID);
             preparedStatement.setInt(2, sender);
