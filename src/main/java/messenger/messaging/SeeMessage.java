@@ -25,7 +25,7 @@ public class SeeMessage {
     @Autowired
     private EventManager eventManager;
 
-    @RequestMapping(value = "/thread/{threadID}/messages/{messageID}/seeMessage", method = RequestMethod.POST)
+    @RequestMapping(value = "/threads/{threadID}/messages/{messageID}/see-message", method = RequestMethod.POST)
     public SeeMessageResponse seeMessage(
             @RequestAttribute("userType") String userType,
             @RequestAttribute("userID") Long userID,
@@ -40,7 +40,7 @@ public class SeeMessage {
     private void setMessageStatusToSeen(String userType, long userID, long threadID, long messageID) {
         int sender = (userType.equals(TokenManager.USER_TYPE_INITIATOR)? 0 : 1);
 
-        String sql = "UPDATE TABLE message SET status='seen' WHERE id<=? AND sender=? AND user_id=? AND thread_id=?";
+        String sql = "UPDATE  message SET status='seen', seen_at = " + System.currentTimeMillis() + " WHERE id<=? AND sender=? AND user_id=? AND thread_id=?";
         int rowAffected = databaseExecutor.executeUpdate(sql, preparedStatement -> {
             preparedStatement.setLong(1, messageID);
             preparedStatement.setInt(2, sender);
@@ -48,7 +48,7 @@ public class SeeMessage {
             preparedStatement.setLong(4, threadID);
         });
 
-        if (rowAffected != 1) throw new SimpleValidationException("Invalid data");
+        if (rowAffected == 0) throw new SimpleValidationException("Invalid data");
     }
 
 }

@@ -23,6 +23,7 @@ public class DatabaseExecutor {
     }
 
     public int executeUpdate(String sql, ValuesSetter valuesSetter) {
+        System.out.println(sql);
         Connection connection = databaseManager.getConnection();
         PreparedStatement preparedStatement = null;
         try {
