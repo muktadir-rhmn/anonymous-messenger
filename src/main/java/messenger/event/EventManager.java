@@ -99,11 +99,11 @@ public class EventManager {
     }
 
 
-    public List<Object> getEventResponses(String userType, Long userID, Long threadID, Long lastEventTime, Integer eventType, Map<String, Object> data) {
+    public List<Object> getEventResponses(String userType, Long userID, Long threadID, Long lastEventTime, Integer eventType, Map<String, Object> listenerData) {
         if (lastEventTime == null) throw new SimpleValidationException("Listener request must contain lastEventTime");
-        if (userID == null && threadID == null) throw new SimpleValidationException("Either userID or threadID must not be empty");
+        if (userID == null && threadID == null) throw new RuntimeException("Either userID or threadID must not be empty");
 
-        String sql = "SELECT id, type, data, created_at FROM event WHERE created_at > " + lastEventTime + " AND invalid=0 AND type=" + eventType + " AND";
+        String sql = "SELECT id, type,  data, created_at FROM event WHERE created_at > " + lastEventTime + " AND invalid=0 AND type=" + eventType + " AND";
         if (userType.equals(TokenManager.USER_TYPE_SINGED_IN)) sql += " user_id=" + userID;
         else if (userType.equals(TokenManager.USER_TYPE_INITIATOR)) sql += " thread_id=" + threadID;
         else throw new RuntimeException("Either userID or threadID must be non-Null");
@@ -112,14 +112,14 @@ public class EventManager {
         databaseExecutor.executeQuery(sql, resultSet -> {
             EventDescriptor descriptor = new EventDescriptor();
             descriptor.id = resultSet.getLong("id");
-            descriptor.userType = resultSet.getString("creator_type");
+            descriptor.userType = userType;
             descriptor.threadID = threadID;
             descriptor.userID = userID;
             descriptor.type= resultSet.getInt("type");
             descriptor.data = jsonToMap(resultSet.getString("data"));
             descriptor.createdAt = resultSet.getLong("created_at");
 
-            Object response = getResponseGenerator(descriptor.type).generateResponseData(descriptor);
+            Object response = getResponseGenerator(descriptor.type).generateResponseData(descriptor, listenerData);
             responses.add(response);
         });
 

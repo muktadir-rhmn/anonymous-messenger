@@ -84,7 +84,7 @@ public class EventProcessor implements Runnable{
                 continue;
             }
 
-            Object response = EventManager.getInstance().getResponseGenerator(eventType).generateResponseData(event.eventDescriptor);
+            Object response = EventManager.getInstance().getResponseGenerator(eventType).generateResponseData(event.eventDescriptor, eventListenerDescriptor.data);
 
             ListenResponse listenResponse = new ListenResponse();
             listenResponse.events.add(response);

@@ -6,6 +6,7 @@ import messenger.error.SimpleValidationException;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 class NewMessageEventResponse {
     public List<Message> messages;
@@ -21,8 +22,8 @@ public class NewMessageEvent extends Event {
 class NewMessageEventResponseGenerator implements EventResponseGenerator {
 
     @Override
-    public EventResponse generateResponseData(EventDescriptor eventDescriptor) {
-        Integer lastMessageID = (Integer) eventDescriptor.data.get("lastMessageID");
+    public EventResponse generateResponseData(EventDescriptor eventDescriptor, Map<String, Object> data) {
+        Integer lastMessageID = (Integer) data.get("lastMessageID");
         if (lastMessageID == null) throw new SimpleValidationException("newMessageEvent listen request must contain lastMessageID");
 
         String sql = "SELECT id, sender, thread_id, status, text, seen_at, created_at as sent_at FROM message ";

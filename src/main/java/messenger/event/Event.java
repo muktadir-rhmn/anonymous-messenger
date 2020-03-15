@@ -9,9 +9,11 @@ public abstract class Event {
     public EventDescriptor eventDescriptor = new EventDescriptor();
 
     Event(String userType, Long userID, Long threadID) {
+        eventDescriptor.type = EventManager.getInstance().getEventType(this);
         eventDescriptor.userType = userType;
         eventDescriptor.userID = userID;
         eventDescriptor.threadID = threadID;
+        eventDescriptor.createdAt = System.currentTimeMillis();
 
         eventDescriptor.data = new HashMap<>();
     }
