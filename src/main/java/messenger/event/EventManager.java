@@ -1,11 +1,9 @@
 package messenger.event;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import messenger.auth.TokenManager;
 import messenger.db.DatabaseExecutor;
 import messenger.error.SimpleValidationException;
+import messenger.utils.JsonConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +57,8 @@ public class EventManager {
     @Autowired
     private DatabaseExecutor databaseExecutor;
 
+    private JsonConverter jsonConverter = new JsonConverter();
+
     public void receive(Event event) {
         event.invalidatePreviousEvents();
         storeInDB(event);
@@ -73,33 +73,10 @@ public class EventManager {
             preparedStatement.setInt(1, eventType);
             preparedStatement.setString(2, event.eventDescriptor.userType);
             preparedStatement.setLong(3, event.eventDescriptor.threadID);
-            preparedStatement.setString(4, mapToJson(event.eventDescriptor.data));
+            preparedStatement.setString(4, jsonConverter.mapToJson(event.eventDescriptor.data));
             preparedStatement.setLong(5, event.eventDescriptor.createdAt);
         });
     }
-
-    private String mapToJson(Map<String, Object> map) {
-        String json = "";
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            json = objectMapper.writeValueAsString(map);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return json;
-    }
-
-    private Map<String, Object> jsonToMap(String json) {
-        Map<String, Object> map = null;
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            map = objectMapper.readValue(json, new TypeReference<Map<String,Object>>(){});
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return map;
-    }
-
 
     public List<Object> getEventResponses(String userType, Long userID, Long threadID, Long lastEventTime, Integer eventType, Map<String, Object> listenerData) {
         if (lastEventTime == null) throw new SimpleValidationException("Listener request must contain lastEventTime");
@@ -118,7 +95,7 @@ public class EventManager {
             descriptor.threadID = resultSet.getLong("thread_id");
             descriptor.userID = resultSet.getLong("user_id");
             descriptor.type= resultSet.getInt("type");
-            descriptor.data = jsonToMap(resultSet.getString("data"));
+            descriptor.data = jsonConverter.jsonToMap(resultSet.getString("data"));
             descriptor.createdAt = resultSet.getLong("created_at");
 
             Object response = getResponseGenerator(descriptor.type).generateResponseData(descriptor, listenerData);
