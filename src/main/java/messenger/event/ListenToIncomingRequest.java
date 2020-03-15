@@ -38,7 +38,7 @@ public class ListenToIncomingRequest {
             @RequestAttribute(value = "threadID", required = false) Long threadID,
             @RequestBody ListenRequest listenRequest
     ) {
-        DeferredResult<ListenResponse> deferredResult = new DeferredResult<>(LISTEN_TIME_OUT_MILLIS);
+        DeferredResult<ListenResponse> deferredResult = new DeferredResult<>();
 
         ListenResponse response = new ListenResponse();
         for (ListenableEventDescriptor descriptor: listenRequest.requestedEvents) {

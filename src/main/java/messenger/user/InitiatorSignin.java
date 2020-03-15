@@ -20,7 +20,7 @@ class InitiatorSigninResponse {
     public String message;
     public String token;
     public String initiatorName;
-
+    public Long threadID;
 }
 
 @RestController
@@ -70,6 +70,7 @@ public class InitiatorSignin {
         InitiatorSigninResponse response = new InitiatorSigninResponse();
         response.message = "Signin successful";
         response.initiatorName = thread.initiatorName;
+        response.threadID = request.threadID;
         response.token = tokenManager.generateTokenForInitiator(thread.userID, request.threadID, thread.initiatorName);
         return response;
     }
