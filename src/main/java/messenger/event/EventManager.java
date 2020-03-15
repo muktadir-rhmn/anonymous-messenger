@@ -31,6 +31,7 @@ public class EventManager {
         eventType = new HashMap<>(10);
         eventType.put(NewMessageEvent.class.getSimpleName(), 0);
         eventType.put(MessageSeenEvent.class.getSimpleName(), 1);
+        eventType.put(TypingEvent.class.getSimpleName(), 2);
     }
 
     public int getEventType(Event event) {
@@ -46,6 +47,7 @@ public class EventManager {
         eventInstance = new HashMap<>(10);
         eventInstance.put(eventType.get(NewMessageEvent.class.getSimpleName()), new NewMessageEventResponseGenerator());
         eventInstance.put(eventType.get(MessageSeenEvent.class.getSimpleName()), new MessageSeenEventResponseGenerator());
+        eventInstance.put(eventType.get(TypingEvent.class.getSimpleName()), new TypingEventResponseGenerator());
     }
     public EventResponseGenerator getResponseGenerator(int eventType) {
         return eventInstance.get(eventType);
