@@ -27,7 +27,7 @@ public class NewMessage {
     public NewMessageResponse newMessage(@RequestAttribute("userType") String userType, @RequestAttribute(value = "userID", required = false) Long userID, @PathVariable Long threadID, @RequestBody NewMessageRequest request) {
         validate(request);
         newMessage(userType, userID, threadID, request.text);
-        eventManager.receive(new NewMessageEvent(userID, threadID));
+        eventManager.receive(new NewMessageEvent(userType, userID, threadID));
 
         NewMessageResponse response = new NewMessageResponse();
         response.message = "Sent Successfully";

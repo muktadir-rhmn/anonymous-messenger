@@ -26,9 +26,14 @@ public class SeeMessage {
     private EventManager eventManager;
 
     @RequestMapping(value = "/thread/{threadID}/messages/{messageID}/seeMessage", method = RequestMethod.POST)
-    public SeeMessageResponse seeMessage(@RequestAttribute("userType") String userType, @RequestAttribute("userID") Long userID, @PathVariable Long threadID, @PathVariable Long messageID) {
+    public SeeMessageResponse seeMessage(
+            @RequestAttribute("userType") String userType,
+            @RequestAttribute("userID") Long userID,
+            @PathVariable Long threadID,
+            @PathVariable Long messageID
+    ) {
         setMessageStatusToSeen(userType, userID, threadID, messageID);
-        eventManager.receive(new MessageSeenEvent(userID, threadID, messageID));
+        eventManager.receive(new MessageSeenEvent(userType, userID, threadID, messageID));
         return new SeeMessageResponse("Successful");
     }
 

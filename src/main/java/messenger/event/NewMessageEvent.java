@@ -13,8 +13,8 @@ class NewMessageEventResponse {
 
 public class NewMessageEvent extends Event {
 
-    public NewMessageEvent(Long userID, long threadID) {
-        super(userID, threadID);
+    public NewMessageEvent(String userType, Long userID, long threadID) {
+        super(userType, userID, threadID);
     }
 }
 

@@ -8,7 +8,8 @@ import java.util.HashMap;
 public abstract class Event {
     public EventDescriptor eventDescriptor = new EventDescriptor();
 
-    Event(Long userID, Long threadID) {
+    Event(String userType, Long userID, Long threadID) {
+        eventDescriptor.userType = userType;
         eventDescriptor.userID = userID;
         eventDescriptor.threadID = threadID;
 

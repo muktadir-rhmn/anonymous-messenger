@@ -1,8 +1,10 @@
 package messenger.event;
 
+import messenger.auth.TokenManager;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -11,12 +13,14 @@ class EventListenerDescriptor {
     public DeferredResult<ListenResponse> deferredResult;
 
     public Integer eventType;
+    public String userType;
     public long userID;
     public Long threadID;
     public Map<String, Object> data;
 
-    public EventListenerDescriptor(DeferredResult<ListenResponse> deferredResult, Long userID, Long threadID, Integer eventType, Map<String, Object> data) {
+    public EventListenerDescriptor(DeferredResult<ListenResponse> deferredResult, String userType, Long userID, Long threadID, Integer eventType, Map<String, Object> data) {
         this.eventType = eventType;
+        this.userType = userType;
         this.userID = userID;
         this.threadID = threadID;
         this.deferredResult = deferredResult;
@@ -34,7 +38,11 @@ public class EventProcessor implements Runnable{
         Thread thread = new Thread(this);
         thread.start();
 
-        listeners.put(0, new ConcurrentLinkedQueue<>()); //for new message event
+        Collection<Integer> eventTypes = EventManager.eventTypes();
+        for (Integer eventType : eventTypes) {
+            listeners.put(eventType, new ConcurrentLinkedQueue<>());
+        }
+
     }
 
     public synchronized void enqueueEvent(Event event) {
@@ -43,8 +51,8 @@ public class EventProcessor implements Runnable{
         notifyAll();
     }
 
-    public synchronized void addEventListener(Long userID, Long threadID, Integer eventType, DeferredResult<ListenResponse> deferredResult, Map<String, Object> data) {
-        listeners.get(eventType).add(new EventListenerDescriptor(deferredResult, userID, threadID, eventType, data));
+    public synchronized void addEventListener(String userType, Long userID, Long threadID, Integer eventType, DeferredResult<ListenResponse> deferredResult, Map<String, Object> data) {
+        listeners.get(eventType).add(new EventListenerDescriptor(deferredResult, userType, userID, threadID, eventType, data));
     }
 
     private synchronized void processEvent() {
@@ -65,22 +73,33 @@ public class EventProcessor implements Runnable{
 
         int eventType = event.getEventType();
         ConcurrentLinkedQueue<EventListenerDescriptor> eventListeners = listeners.get(eventType);
+        ConcurrentLinkedQueue<EventListenerDescriptor> tmpListeners = new ConcurrentLinkedQueue<>();
         while (!eventListeners.isEmpty()){
-            EventListenerDescriptor descriptor = eventListeners.poll();
+            EventListenerDescriptor eventListenerDescriptor = eventListeners.poll();
 
-            if (descriptor.deferredResult.isSetOrExpired()) continue;
+            if (eventListenerDescriptor.deferredResult.isSetOrExpired()) continue;
 
-            if (descriptor.threadID != null && !descriptor.threadID.equals(event.threadID)) continue;
+            if (!isListenersEvent(eventListenerDescriptor, event)) {
+                tmpListeners.add(eventListenerDescriptor);
+                continue;
+            }
 
-            EventDescriptor eventDescriptor = new EventDescriptor();
-            eventDescriptor.threadID = descriptor.threadID;
-            eventDescriptor.userID = descriptor.userID;
-            Object response = event.generateResponseData(eventDescriptor, event.createdAt, descriptor.data);
+            Object response = EventManager.getInstance().getResponseGenerator(eventType).generateResponseData(event.eventDescriptor);
 
             ListenResponse listenResponse = new ListenResponse();
             listenResponse.events.add(response);
-            descriptor.deferredResult.setResult(listenResponse);
+            eventListenerDescriptor.deferredResult.setResult(listenResponse);
         }
+
+        eventListeners.addAll(tmpListeners);
+    }
+
+    private boolean isListenersEvent(EventListenerDescriptor eventListenerDescriptor, Event event) {
+        if(eventListenerDescriptor.userType.equals(TokenManager.USER_TYPE_SINGED_IN)) {
+            return eventListenerDescriptor.userID == event.eventDescriptor.userID;
+        } else if (eventListenerDescriptor.userType.equals(TokenManager.USER_TYPE_INITIATOR)){
+            return eventListenerDescriptor.threadID.equals(event.eventDescriptor.threadID);
+        } return false;
     }
 
     @Override

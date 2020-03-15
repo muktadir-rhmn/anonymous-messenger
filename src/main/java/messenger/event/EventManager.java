@@ -3,15 +3,13 @@ package messenger.event;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import messenger.auth.TokenManager;
 import messenger.db.DatabaseExecutor;
 import messenger.error.SimpleValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class EventManager {
@@ -36,9 +34,11 @@ public class EventManager {
     }
 
     public int getEventType(Event event) {
-        Integer type = eventType.get(event.getClass().getSimpleName());
-        System.out.println(type);
-        return type;
+        return eventType.get(event.getClass().getSimpleName());
+    }
+
+    public static Collection<Integer> eventTypes() {
+        return eventType.values();
     }
 
     private static Map<Integer, EventResponseGenerator> eventInstance;
@@ -66,12 +66,13 @@ public class EventManager {
     private void storeInDB(Event event) {
         int eventType = getEventType(event);
 
-        String sql = "INSERT INTO event(type, user_id, thread_id, data, created_at) VALUES(?, " + event.eventDescriptor.userID + ", ?, ?, ?)";
+        String sql = "INSERT INTO event(type, creator_type, user_id, thread_id, data, created_at) VALUES(?, ?, " + event.eventDescriptor.userID + ", ?, ?, ?)";
         DatabaseExecutor.getInstance().executeUpdate(sql, preparedStatement -> {
             preparedStatement.setInt(1, eventType);
-            preparedStatement.setLong(2, event.eventDescriptor.threadID);
-            preparedStatement.setString(3, mapToJson(event.eventDescriptor.data));
-            preparedStatement.setLong(4, event.eventDescriptor.createdAt);
+            preparedStatement.setString(2, event.eventDescriptor.userType);
+            preparedStatement.setLong(3, event.eventDescriptor.threadID);
+            preparedStatement.setString(4, mapToJson(event.eventDescriptor.data));
+            preparedStatement.setLong(5, event.eventDescriptor.createdAt);
         });
     }
 
@@ -98,19 +99,20 @@ public class EventManager {
     }
 
 
-    public List<Object> getEventResponses(Long userID, Long threadID, Long lastEventTime, Integer eventType, Map<String, Object> data) {
+    public List<Object> getEventResponses(String userType, Long userID, Long threadID, Long lastEventTime, Integer eventType, Map<String, Object> data) {
         if (lastEventTime == null) throw new SimpleValidationException("Listener request must contain lastEventTime");
         if (userID == null && threadID == null) throw new SimpleValidationException("Either userID or threadID must not be empty");
 
         String sql = "SELECT id, type, data, created_at FROM event WHERE created_at > " + lastEventTime + " AND invalid=0 AND type=" + eventType + " AND";
-        if (userID != null) sql += " user_id=" + userID;
-        else if (threadID != null) sql += " thread_id=" + threadID;
+        if (userType.equals(TokenManager.USER_TYPE_SINGED_IN)) sql += " user_id=" + userID;
+        else if (userType.equals(TokenManager.USER_TYPE_INITIATOR)) sql += " thread_id=" + threadID;
         else throw new RuntimeException("Either userID or threadID must be non-Null");
 
         List<Object> responses = new LinkedList<>();
         databaseExecutor.executeQuery(sql, resultSet -> {
             EventDescriptor descriptor = new EventDescriptor();
             descriptor.id = resultSet.getLong("id");
+            descriptor.userType = resultSet.getString("creator_type");
             descriptor.threadID = threadID;
             descriptor.userID = userID;
             descriptor.type= resultSet.getInt("type");

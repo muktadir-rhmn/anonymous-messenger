@@ -34,6 +34,7 @@ public class ListenToIncomingRequest {
 
     @RequestMapping(value = "/listen", method = RequestMethod.POST)
     public DeferredResult<ListenResponse> listen(
+            @RequestAttribute("userType") String userType,
             @RequestAttribute(value = "userID") Long userID,
             @RequestAttribute(value = "threadID", required = false) Long threadID,
             @RequestBody ListenRequest listenRequest
@@ -42,7 +43,7 @@ public class ListenToIncomingRequest {
 
         ListenResponse response = new ListenResponse();
         for (ListenableEventDescriptor descriptor: listenRequest.requestedEvents) {
-            response.events.addAll(eventManager.getEventResponses(userID, threadID, listenRequest.lastEventTime, descriptor.eventType, descriptor.data));
+            response.events.addAll(eventManager.getEventResponses(userType, userID, threadID, listenRequest.lastEventTime, descriptor.eventType, descriptor.data));
         }
         if (response.events.size() > 0) {
             System.out.println("Event found. So, going to respond.");
@@ -50,7 +51,7 @@ public class ListenToIncomingRequest {
         } else {
             System.out.println("No event found. So, going to listen");
             for (ListenableEventDescriptor descriptor: listenRequest.requestedEvents) {
-                eventProcessor.addEventListener(userID, threadID, descriptor.eventType, deferredResult, descriptor.data);
+                eventProcessor.addEventListener(userType, userID, threadID, descriptor.eventType, deferredResult, descriptor.data);
             }
         }
 
