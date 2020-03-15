@@ -1,5 +1,8 @@
 package messenger.event;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import messenger.db.DatabaseExecutor;
 import messenger.error.SimpleValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,7 @@ public class EventManager {
     static {
         eventType = new HashMap<>(10);
         eventType.put(NewMessageEvent.class.getSimpleName(), 0);
+        eventType.put(MessageSeenEvent.class.getSimpleName(), 1);
     }
 
     public int getEventType(Event event) {
@@ -40,7 +44,8 @@ public class EventManager {
     private static Map<Integer, EventResponseGenerator> eventInstance;
     static {
         eventInstance = new HashMap<>(10);
-        eventInstance.put(0, new NewMessageEvent());
+        eventInstance.put(eventType.get(NewMessageEvent.class.getSimpleName()), new NewMessageEventResponseGenerator());
+        eventInstance.put(eventType.get(MessageSeenEvent.class.getSimpleName()), new MessageSeenEventResponseGenerator());
     }
     public EventResponseGenerator getResponseGenerator(int eventType) {
         return eventInstance.get(eventType);
@@ -60,20 +65,36 @@ public class EventManager {
 
     private void storeInDB(Event event) {
         int eventType = getEventType(event);
-        Long userID = event.userID;
-        Long threadID = event.threadID;
-        String data = event.encodeEventData();
-        long createdAt = System.currentTimeMillis();
 
-        event.createdAt = createdAt;
-
-        String sql = "INSERT INTO event(type, user_id, thread_id, data, created_at) VALUES(?, "+userID+", ?, ?, ?)";
+        String sql = "INSERT INTO event(type, user_id, thread_id, data, created_at) VALUES(?, " + event.eventDescriptor.userID + ", ?, ?, ?)";
         DatabaseExecutor.getInstance().executeUpdate(sql, preparedStatement -> {
             preparedStatement.setInt(1, eventType);
-            preparedStatement.setLong(2, threadID);
-            preparedStatement.setString(3, data);
-            preparedStatement.setLong(4, createdAt);
+            preparedStatement.setLong(2, event.eventDescriptor.threadID);
+            preparedStatement.setString(3, mapToJson(event.eventDescriptor.data));
+            preparedStatement.setLong(4, event.eventDescriptor.createdAt);
         });
+    }
+
+    private String mapToJson(Map<String, Object> map) {
+        String json = "";
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            json = objectMapper.writeValueAsString(map);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return json;
+    }
+
+    private Map<String, Object> jsonToMap(String json) {
+        Map<String, Object> map = null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            map = objectMapper.readValue(json, new TypeReference<Map<String,Object>>(){});
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return map;
     }
 
 
@@ -93,10 +114,10 @@ public class EventManager {
             descriptor.threadID = threadID;
             descriptor.userID = userID;
             descriptor.type= resultSet.getInt("type");
-            descriptor.data = resultSet.getString("data");
+            descriptor.data = jsonToMap(resultSet.getString("data"));
             descriptor.createdAt = resultSet.getLong("created_at");
 
-            Object response = getResponseGenerator(descriptor.type).generateResponseData(descriptor, descriptor.createdAt, data);
+            Object response = getResponseGenerator(descriptor.type).generateResponseData(descriptor);
             responses.add(response);
         });
 

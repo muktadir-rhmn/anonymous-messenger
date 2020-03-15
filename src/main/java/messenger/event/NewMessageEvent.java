@@ -6,7 +6,6 @@ import messenger.error.SimpleValidationException;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 class NewMessageEventResponse {
     public List<Message> messages;
@@ -14,30 +13,16 @@ class NewMessageEventResponse {
 
 public class NewMessageEvent extends Event {
 
-    NewMessageEvent(){
-
-    }
     public NewMessageEvent(Long userID, long threadID) {
-        this.threadID = threadID;
-        this.userID = userID;
+        super(userID, threadID);
     }
+}
+
+class NewMessageEventResponseGenerator implements EventResponseGenerator {
 
     @Override
-    public String encodeEventData() {
-        return null;
-    }
-
-    @Override
-    public void invalidatePreviousEvents() {
-        int eventType = EventManager.getInstance().getEventType(this);
-        String sql = "UPDATE event SET invalid=1 WHERE type=" + eventType + " AND user_id=" + userID;
-        DatabaseExecutor.getInstance().executeUpdate(sql);
-    }
-
-
-    @Override
-    public EventResponse generateResponseData(EventDescriptor eventDescriptor, Long createdAt, Map<String, Object> data) {
-        Integer lastMessageID = (Integer) data.get("lastMessageID");
+    public EventResponse generateResponseData(EventDescriptor eventDescriptor) {
+        Integer lastMessageID = (Integer) eventDescriptor.data.get("lastMessageID");
         if (lastMessageID == null) throw new SimpleValidationException("newMessageEvent listen request must contain lastMessageID");
 
         String sql = "SELECT id, sender, thread_id, status, text, seen_at, created_at as sent_at FROM message ";
@@ -62,8 +47,7 @@ public class NewMessageEvent extends Event {
         NewMessageEventResponse response = new NewMessageEventResponse();
         response.messages = messages;
 
-        int eventType = EventManager.getInstance().getEventType(this);
-        return new EventResponse(eventType, response, createdAt);
+        int eventType = eventDescriptor.type;
+        return new EventResponse(eventType, response, eventDescriptor.createdAt);
     }
 }
-

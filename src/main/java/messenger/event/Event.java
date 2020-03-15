@@ -1,15 +1,29 @@
 package messenger.event;
 
 
-public abstract class Event implements EventResponseGenerator{
-    public Long userID = null;
-    public Long threadID = null;
-    public long createdAt;
+import messenger.db.DatabaseExecutor;
 
-    public abstract String encodeEventData();
+import java.util.HashMap;
+
+public abstract class Event {
+    public EventDescriptor eventDescriptor = new EventDescriptor();
+
+    Event(Long userID, Long threadID) {
+        eventDescriptor.userID = userID;
+        eventDescriptor.threadID = threadID;
+
+        eventDescriptor.data = new HashMap<>();
+    }
+
     public int getEventType() {
         return EventManager.getInstance().getEventType(this);
     }
 
-    public abstract void invalidatePreviousEvents();
+    public void invalidatePreviousEvents() {
+        int eventType = EventManager.getInstance().getEventType(this);
+        String sql = "UPDATE event SET invalid=1 WHERE type=" + eventType + " AND ";
+        if (eventDescriptor.userID != null) sql += " user_id=" + eventDescriptor.userID;
+        else if (eventDescriptor.threadID != null) sql += " thread_id=" + eventDescriptor.threadID;
+        DatabaseExecutor.getInstance().executeUpdate(sql);
+    }
 }
