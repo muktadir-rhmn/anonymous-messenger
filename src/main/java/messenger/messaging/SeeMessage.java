@@ -34,7 +34,7 @@ public class SeeMessage {
     ) {
         long seenAt = System.currentTimeMillis();
         setMessageStatusToSeen(userType, userID, threadID, messageID, seenAt);
-        eventManager.receive(new MessageSeenEvent(userType, userID, threadID, messageID, seenAt));
+        eventManager.newEvent(new MessageSeenEvent(userType, userID, threadID, messageID, seenAt));
         return new SeeMessageResponse("Successful");
     }
 

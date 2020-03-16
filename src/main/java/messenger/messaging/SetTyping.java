@@ -16,7 +16,7 @@ public class SetTyping {
             @RequestAttribute("userID") Long userID,
             @PathVariable Long threadID
     ) {
-        eventManager.receive(new TypingEvent(userType, userID, threadID));
+        eventManager.newEvent(new TypingEvent(userType, userID, threadID));
         return "";
     }
 }

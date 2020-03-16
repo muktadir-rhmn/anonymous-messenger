@@ -1,11 +1,11 @@
 package messenger.event;
 
-import messenger.auth.TokenManager;
 import messenger.db.DatabaseExecutor;
-import messenger.error.SimpleValidationException;
+import messenger.user.UserDescriptor;
 import messenger.utils.JsonConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.*;
 
@@ -52,39 +52,27 @@ public class EventManager {
     }
 
     @Autowired
-    private EventProcessor eventProcessor;
+    private AsyncEventProcessor asyncEventProcessor;
 
     @Autowired
     private DatabaseExecutor databaseExecutor;
 
     private JsonConverter jsonConverter = new JsonConverter();
 
-    public void receive(Event event) {
+    public void newEvent(Event event) {
         event.invalidatePreviousEvents();
         storeInDB(event);
-        eventProcessor.enqueueEvent(event);
+        asyncEventProcessor.enqueueEvent(event);
     }
 
-    private void storeInDB(Event event) {
-        int eventType = getEventType(event);
-
-        String sql = "INSERT INTO event(type, creator_type, user_id, thread_id, data, created_at) VALUES(?, ?, " + event.eventDescriptor.userID + ", ?, ?, ?)";
-        DatabaseExecutor.getInstance().executeUpdate(sql, preparedStatement -> {
-            preparedStatement.setInt(1, eventType);
-            preparedStatement.setString(2, event.eventDescriptor.userType);
-            preparedStatement.setLong(3, event.eventDescriptor.threadID);
-            preparedStatement.setString(4, jsonConverter.mapToJson(event.eventDescriptor.data));
-            preparedStatement.setLong(5, event.eventDescriptor.createdAt);
-        });
+    public void addEventListener(DeferredResult<ListenResponse> deferredResult, UserDescriptor userDescriptor, Integer eventType, Map<String, Object> eventData) {
+        asyncEventProcessor.addEventListener(deferredResult, userDescriptor, eventType, eventData);
     }
 
-    public List<Object> getEventResponses(String userType, Long userID, Long threadID, Long lastEventTime, Integer eventType, Map<String, Object> listenerData) {
-        if (lastEventTime == null) throw new SimpleValidationException("Listener request must contain lastEventTime");
-        if (userID == null && threadID == null) throw new RuntimeException("Either userID or threadID must not be empty");
-
+    public List<Object> getEventResponses(UserDescriptor userDescriptor, Long lastEventTime, Integer eventType, Map<String, Object> listenerData) {
         String sql = "SELECT id, type, creator_type, user_id, thread_id, data, created_at FROM event WHERE created_at > " + lastEventTime + " AND invalid=0 AND type=" + eventType + " AND";
-        if (userType.equals(TokenManager.USER_TYPE_SINGED_IN)) sql += " user_id=" + userID;
-        else if (userType.equals(TokenManager.USER_TYPE_INITIATOR)) sql += " thread_id=" + threadID;
+        if (userDescriptor.isSignedinUser()) sql += " user_id=" + userDescriptor.userID;
+        else if (userDescriptor.isInitiator()) sql += " thread_id=" + userDescriptor.threadID;
         else throw new RuntimeException("Either userID or threadID must be non-Null");
 
         List<Object> responses = new LinkedList<>();
@@ -103,5 +91,18 @@ public class EventManager {
         });
 
         return responses;
+    }
+
+    private void storeInDB(Event event) {
+        int eventType = getEventType(event);
+
+        String sql = "INSERT INTO event(type, creator_type, user_id, thread_id, data, created_at) VALUES(?, ?, " + event.eventDescriptor.userID + ", ?, ?, ?)";
+        DatabaseExecutor.getInstance().executeUpdate(sql, preparedStatement -> {
+            preparedStatement.setInt(1, eventType);
+            preparedStatement.setString(2, event.eventDescriptor.userType);
+            preparedStatement.setLong(3, event.eventDescriptor.threadID);
+            preparedStatement.setString(4, jsonConverter.mapToJson(event.eventDescriptor.data));
+            preparedStatement.setLong(5, event.eventDescriptor.createdAt);
+        });
     }
 }

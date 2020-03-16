@@ -1,6 +1,6 @@
 package messenger.event;
 
-import messenger.auth.TokenManager;
+import messenger.user.UserDescriptor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;
 
@@ -11,30 +11,25 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 class EventListenerDescriptor {
     public DeferredResult<ListenResponse> deferredResult;
-
+    public UserDescriptor userDescriptor;
     public Integer eventType;
-    public String userType;
-    public long userID;
-    public Long threadID;
-    public Map<String, Object> data;
+    public Map<String, Object> eventData;
 
-    public EventListenerDescriptor(DeferredResult<ListenResponse> deferredResult, String userType, Long userID, Long threadID, Integer eventType, Map<String, Object> data) {
+    public EventListenerDescriptor(DeferredResult<ListenResponse> deferredResult, UserDescriptor userDescriptor, Integer eventType, Map<String, Object> eventData) {
         this.eventType = eventType;
-        this.userType = userType;
-        this.userID = userID;
-        this.threadID = threadID;
+        this.userDescriptor = userDescriptor;
         this.deferredResult = deferredResult;
-        this.data = data;
+        this.eventData = eventData;
     }
 
 }
 
 @Service
-public class EventProcessor implements Runnable{
+class AsyncEventProcessor implements Runnable{
     private ConcurrentLinkedQueue<Event> queue = new ConcurrentLinkedQueue<>();
     private ConcurrentHashMap<Integer, ConcurrentLinkedQueue<EventListenerDescriptor>> listeners = new ConcurrentHashMap<>(); //todo: move this to event manager
 
-    public EventProcessor() {
+    public AsyncEventProcessor() {
         Thread thread = new Thread(this);
         thread.start();
 
@@ -42,7 +37,6 @@ public class EventProcessor implements Runnable{
         for (Integer eventType : eventTypes) {
             listeners.put(eventType, new ConcurrentLinkedQueue<>());
         }
-
     }
 
     public synchronized void enqueueEvent(Event event) {
@@ -51,8 +45,8 @@ public class EventProcessor implements Runnable{
         notifyAll();
     }
 
-    public synchronized void addEventListener(String userType, Long userID, Long threadID, Integer eventType, DeferredResult<ListenResponse> deferredResult, Map<String, Object> data) {
-        listeners.get(eventType).add(new EventListenerDescriptor(deferredResult, userType, userID, threadID, eventType, data));
+    public synchronized void addEventListener(DeferredResult<ListenResponse> deferredResult, UserDescriptor userDescriptor, int eventType, Map<String, Object> data) {
+        listeners.get(eventType).add(new EventListenerDescriptor(deferredResult, userDescriptor, eventType, data));
     }
 
     private synchronized void processEvent() {
@@ -84,7 +78,7 @@ public class EventProcessor implements Runnable{
                 continue;
             }
 
-            Object response = EventManager.getInstance().getResponseGenerator(eventType).generateResponseData(event.eventDescriptor, eventListenerDescriptor.data);
+            Object response = EventManager.getInstance().getResponseGenerator(eventType).generateResponseData(event.eventDescriptor, eventListenerDescriptor.eventData);
 
             ListenResponse listenResponse = new ListenResponse();
             listenResponse.events.add(response);
@@ -95,10 +89,10 @@ public class EventProcessor implements Runnable{
     }
 
     private boolean isListenersEvent(EventListenerDescriptor eventListenerDescriptor, Event event) {
-        if(eventListenerDescriptor.userType.equals(TokenManager.USER_TYPE_SINGED_IN)) {
-            return eventListenerDescriptor.userID == event.eventDescriptor.userID;
-        } else if (eventListenerDescriptor.userType.equals(TokenManager.USER_TYPE_INITIATOR)){
-            return eventListenerDescriptor.threadID.equals(event.eventDescriptor.threadID);
+        if(eventListenerDescriptor.userDescriptor.isSignedinUser()) {
+            return eventListenerDescriptor.userDescriptor.userID.equals(event.eventDescriptor.userID);
+        } else if (eventListenerDescriptor.userDescriptor.isInitiator()){
+            return eventListenerDescriptor.userDescriptor.threadID.equals(event.eventDescriptor.threadID);
         } return false;
     }
 
