@@ -3,6 +3,7 @@ package messenger.auth;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
@@ -71,6 +72,10 @@ public class TokenManager {
     }
 
     public boolean verifyTokenAndSetRequestAttr(String token, HttpServletRequest request) {
+        if (token == null) {
+            return false;
+        }
+
         try {
             DecodedJWT decodedToken = tokenVerifier.verify(token);
             Map<String, Claim> claimMap = decodedToken.getClaims();
@@ -78,7 +83,7 @@ public class TokenManager {
             for (String key: claimMap.keySet()) {
                 request.setAttribute(key, claimMap.get(key).asString());
             }
-        } catch (JWTCreationException exception){
+        } catch (JWTCreationException | JWTDecodeException exception){
             return false;
         }
         return true;

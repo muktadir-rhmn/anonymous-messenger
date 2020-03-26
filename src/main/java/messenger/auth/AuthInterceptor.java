@@ -21,10 +21,6 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
         String token = request.getHeader("token");
 
-        if (token == null) {
-            return false;
-        }
-
         boolean isValidToken = tokenManager.verifyTokenAndSetRequestAttr(token, request);
 
         return isValidToken;
