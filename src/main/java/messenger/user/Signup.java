@@ -2,11 +2,13 @@ package messenger.user;
 
 import messenger.auth.SigninNotRequired;
 import messenger.db.DatabaseExecutor;
+import messenger.error.MappedValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import sun.plugin.dom.html.ns4.HTMLAppletCollection;
 
 class SignupRequest {
     public String name;
@@ -46,6 +48,12 @@ public class Signup {
     }
 
     private void validate(SignupRequest signup) {
+        MappedValidationException mappedValidationException = new MappedValidationException();
 
+        if (signup.email.length() == 0) mappedValidationException.put("email", "You must put email address");
+        if (signup.name.length() == 0) mappedValidationException.put("name", "You must give a user name");
+        if (signup.password.length() < 8) mappedValidationException.put("password", "Password must conatain at least 8 characters");
+
+        if (!mappedValidationException.isEmpty()) throw mappedValidationException;
     }
 }

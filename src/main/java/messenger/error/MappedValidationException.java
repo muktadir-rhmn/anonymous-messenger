@@ -15,4 +15,8 @@ public class MappedValidationException extends ValidationException {
         if (map == null) map = new HashMap<>();
         map.put(fieldName, errorMessage);
     }
+
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
 }
