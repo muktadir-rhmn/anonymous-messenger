@@ -2,6 +2,7 @@ package messenger.messaging;
 
 import messenger.auth.TokenManager;
 import messenger.db.DatabaseExecutor;
+import messenger.error.SimpleValidationException;
 import messenger.event.EventManager;
 import messenger.event.NewMessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +49,6 @@ public class NewMessage {
     }
 
     private void validate(NewMessageRequest request) {
+        if (request.text.length() < 1) throw new SimpleValidationException("Message must not be Empty");
     }
 }
