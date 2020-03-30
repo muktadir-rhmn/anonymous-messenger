@@ -2,7 +2,7 @@ package messenger.event;
 
 import java.util.Map;
 
-class EventDescriptor {
+public class EventDescriptor {
     public Long id;
     public String userType;
     public Long userID;

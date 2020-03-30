@@ -1,5 +1,6 @@
 package messenger.event;
 
+import messenger.event.events.Event;
 import messenger.user.UserDescriptor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.async.DeferredResult;

@@ -1,8 +1,9 @@
-package messenger.event;
+package messenger.event.events;
 
 import messenger.db.DatabaseExecutor;
 import messenger.db.models.Message;
 import messenger.error.SimpleValidationException;
+import messenger.event.EventDescriptor;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,14 +13,8 @@ class NewMessageEventResponse {
     public List<Message> messages;
 }
 
-public class NewMessageEvent extends Event {
 
-    public NewMessageEvent(String userType, Long userID, long threadID) {
-        super(userType, userID, threadID);
-    }
-}
-
-class NewMessageEventResponseGenerator implements EventResponseGenerator {
+public class NewMessageEventResponseGenerator implements EventResponseGenerator {
 
     @Override
     public EventResponse generateResponseData(EventDescriptor eventDescriptor, Map<String, Object> data) {

@@ -1,7 +1,7 @@
 package messenger.messaging;
 
 import messenger.event.EventManager;
-import messenger.event.TypingEvent;
+import messenger.event.events.TypingEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

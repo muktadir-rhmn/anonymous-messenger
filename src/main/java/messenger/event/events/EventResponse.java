@@ -1,4 +1,5 @@
-package messenger.event;
+package messenger.event.events;
+
 
 public class EventResponse {
     public int eventType;

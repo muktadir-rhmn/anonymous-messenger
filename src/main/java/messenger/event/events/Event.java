@@ -1,7 +1,9 @@
-package messenger.event;
+package messenger.event.events;
 
 
 import messenger.db.DatabaseExecutor;
+import messenger.event.EventDescriptor;
+import messenger.event.EventManager;
 
 import java.util.HashMap;
 

@@ -4,7 +4,7 @@ import messenger.auth.TokenManager;
 import messenger.db.DatabaseExecutor;
 import messenger.error.SimpleValidationException;
 import messenger.event.EventManager;
-import messenger.event.MessageSeenEvent;
+import messenger.event.events.MessageSeenEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
