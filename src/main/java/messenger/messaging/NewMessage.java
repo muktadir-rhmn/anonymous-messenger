@@ -39,10 +39,10 @@ public class NewMessage {
     private void newMessage(UserDescriptor userDescriptor, String text) {
         int sender = (userDescriptor.isInitiator() ? 1 : 0);
 
-        String sql = "INSERT INTO message(sender, thread_id, user_id, status, text, created_at) VALUES(?, ?, " + userDescriptor.userID + ", ?, ?, ?);";
+        String sql = "INSERT INTO message(sender, thread_id, user_id, status, text, created_at) VALUES(?, ?, " + userDescriptor.getUserID() + ", ?, ?, ?);";
         databaseExecutor.executeUpdate(sql, (ps -> {
             ps.setInt(1, sender);
-            ps.setLong(2, userDescriptor.threadID);
+            ps.setLong(2, userDescriptor.getThreadID());
             ps.setString(3, "unseen");
             ps.setString(4, text);
             ps.setLong(5, System.currentTimeMillis());

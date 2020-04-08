@@ -35,7 +35,7 @@ public class GetThreadList {
 
     @RequestMapping(value = "/threads", method = RequestMethod.GET)
     public GetThreadListResponse getThreadList(@RequestAttribute("user") UserDescriptor userDescriptor) {
-        return fetchThreadList(userDescriptor.userID);
+        return fetchThreadList(userDescriptor.getUserID());
     }
 
     private GetThreadListResponse fetchThreadList(Long userID) {
