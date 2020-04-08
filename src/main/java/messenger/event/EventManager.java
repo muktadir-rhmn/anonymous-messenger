@@ -72,8 +72,8 @@ public class EventManager {
 
     public List<Object> getEventResponses(UserDescriptor userDescriptor, Long lastEventTime, Integer eventType, Map<String, Object> listenerData) {
         String sql = "SELECT id, type, creator_type, user_id, thread_id, data, created_at FROM event WHERE created_at > " + lastEventTime + " AND invalid=0 AND type=" + eventType + " AND";
-        if (userDescriptor.isSignedinUser()) sql += " user_id=" + userDescriptor.userID;
-        else if (userDescriptor.isInitiator()) sql += " thread_id=" + userDescriptor.threadID;
+        if (userDescriptor.isSignedinUser()) sql += " user_id=" + userDescriptor.getUserID();
+        else if (userDescriptor.isInitiator()) sql += " thread_id=" + userDescriptor.getThreadID();
         else throw new RuntimeException("Either userID or threadID must be non-Null");
 
         List<Object> responses = new LinkedList<>();

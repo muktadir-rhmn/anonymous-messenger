@@ -91,9 +91,9 @@ class AsyncEventProcessor implements Runnable{
 
     private boolean isListenersEvent(EventListenerDescriptor eventListenerDescriptor, Event event) {
         if(eventListenerDescriptor.userDescriptor.isSignedinUser()) {
-            return eventListenerDescriptor.userDescriptor.userID.equals(event.eventDescriptor.userID);
+            return eventListenerDescriptor.userDescriptor.getUserID().equals(event.eventDescriptor.userID);
         } else if (eventListenerDescriptor.userDescriptor.isInitiator()){
-            return eventListenerDescriptor.userDescriptor.threadID.equals(event.eventDescriptor.threadID);
+            return eventListenerDescriptor.userDescriptor.getThreadID().equals(event.eventDescriptor.threadID);
         } return false;
     }
 
