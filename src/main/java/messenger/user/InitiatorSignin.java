@@ -1,7 +1,7 @@
 package messenger.user;
 
-import messenger.auth.SigninNotRequired;
-import messenger.auth.TokenManager;
+import messenger.user.auth.SigninNotRequired;
+import messenger.user.auth.TokenManager;
 import messenger.db.DatabaseExecutor;
 import messenger.db.models.Thread;
 import messenger.error.MappedValidationException;

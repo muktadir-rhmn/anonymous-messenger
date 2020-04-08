@@ -33,16 +33,12 @@ public class ListenToIncomingRequest {
 
     @RequestMapping(value = "/listen", method = RequestMethod.POST)
     public DeferredResult<ListenResponse> listen(
-            @RequestAttribute("userType") String userType,
-            @RequestAttribute(value = "userID") Long userID,
-            @RequestAttribute(value = "threadID", required = false) Long threadID,
+            @RequestAttribute("user") UserDescriptor userDescriptor,
             @RequestBody ListenRequest listenRequest
     ) {
         validate(listenRequest);
 
         DeferredResult<ListenResponse> deferredResult = new DeferredResult<>();
-
-        UserDescriptor userDescriptor = new UserDescriptor(userType, userID, threadID);
 
         ListenResponse response = new ListenResponse();
         for (ListenableEventDescriptor descriptor: listenRequest.requestedEvents) {

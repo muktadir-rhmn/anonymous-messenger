@@ -1,13 +1,11 @@
 package messenger.event.events;
 
-import messenger.db.models.Message;
-
-import java.util.List;
+import messenger.user.UserDescriptor;
 
 public class NewMessageEvent extends Event {
 
-    public NewMessageEvent(String userType, Long userID, long threadID) {
-        super(userType, userID, threadID);
+    public NewMessageEvent(UserDescriptor userDescriptor, long threadID) {
+        super(userDescriptor, threadID);
     }
 }
 

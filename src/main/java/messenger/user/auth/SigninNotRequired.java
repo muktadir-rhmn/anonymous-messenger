@@ -1,4 +1,4 @@
-package messenger.auth;
+package messenger.user.auth;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

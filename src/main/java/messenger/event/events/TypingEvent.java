@@ -1,9 +1,11 @@
 package messenger.event.events;
 
 
+import messenger.user.UserDescriptor;
+
 public class TypingEvent extends Event {
-    public TypingEvent(String userType, Long userID, Long threadID) {
-        super(userType, userID, threadID);
+    public TypingEvent(UserDescriptor userDescriptor, Long threadID) {
+        super(userDescriptor, threadID);
     }
 }
 

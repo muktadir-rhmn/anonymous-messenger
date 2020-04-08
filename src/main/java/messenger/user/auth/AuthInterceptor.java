@@ -1,5 +1,6 @@
-package messenger.auth;
+package messenger.user.auth;
 
+import messenger.user.UserDescriptor;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -21,8 +22,11 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
         String token = request.getHeader("token");
 
-        boolean isValidToken = tokenManager.verifyTokenAndSetRequestAttr(token, request);
+        UserDescriptor userDescriptor = tokenManager.verifyTokenAndDecodeData(token);
 
-        return isValidToken;
+        if (userDescriptor == null) return false;
+
+        request.setAttribute("user", userDescriptor);
+        return true;
     }
 }

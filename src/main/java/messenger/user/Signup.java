@@ -1,6 +1,6 @@
 package messenger.user;
 
-import messenger.auth.SigninNotRequired;
+import messenger.user.auth.SigninNotRequired;
 import messenger.db.DatabaseExecutor;
 import messenger.error.MappedValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import sun.plugin.dom.html.ns4.HTMLAppletCollection;
 
 class SignupRequest {
     public String name;

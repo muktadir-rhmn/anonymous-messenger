@@ -1,6 +1,7 @@
 package messenger.messaging;
 
 import messenger.db.DatabaseExecutor;
+import messenger.user.UserDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,18 +34,18 @@ public class GetThreadList {
     private DatabaseExecutor databaseExecutor;
 
     @RequestMapping(value = "/threads", method = RequestMethod.GET)
-    public GetThreadListResponse getThreadList(@RequestAttribute("userID") String userID) {
-        return fetchThreadList(userID);
+    public GetThreadListResponse getThreadList(@RequestAttribute("user") UserDescriptor userDescriptor) {
+        return fetchThreadList(userDescriptor.userID);
     }
 
-    private GetThreadListResponse fetchThreadList(String userID) {
+    private GetThreadListResponse fetchThreadList(Long userID) {
         GetThreadListResponse response = new GetThreadListResponse();
 
         String sql = "SELECT id, user_id, `name`, initiator_name, created_at FROM thread WHERE user_id=?";
         databaseExecutor.executeQuery(
                 sql,
                 preparedStatement -> {
-                    preparedStatement.setLong(1, Long.parseLong(userID));
+                    preparedStatement.setLong(1, userID);
                 },
                 resultSet -> {
                     ThreadDescriptor thread = new ThreadDescriptor();

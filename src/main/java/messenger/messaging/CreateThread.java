@@ -1,6 +1,6 @@
 package messenger.messaging;
 
-import messenger.auth.SigninNotRequired;
+import messenger.user.auth.SigninNotRequired;
 import messenger.db.DatabaseExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -4,16 +4,17 @@ package messenger.event.events;
 import messenger.db.DatabaseExecutor;
 import messenger.event.EventDescriptor;
 import messenger.event.EventManager;
+import messenger.user.UserDescriptor;
 
 import java.util.HashMap;
 
 public abstract class Event {
     public EventDescriptor eventDescriptor = new EventDescriptor();
 
-    Event(String userType, Long userID, Long threadID) {
+    Event(UserDescriptor userDescriptor, Long threadID) {
         eventDescriptor.type = EventManager.getInstance().getEventType(this);
-        eventDescriptor.userType = userType;
-        eventDescriptor.userID = userID;
+        eventDescriptor.userType = userDescriptor.getUserType();
+        eventDescriptor.userID = userDescriptor.getUserID();
         eventDescriptor.threadID = threadID;
         eventDescriptor.createdAt = System.currentTimeMillis();
 

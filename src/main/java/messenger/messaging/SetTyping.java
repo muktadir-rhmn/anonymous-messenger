@@ -2,6 +2,7 @@ package messenger.messaging;
 
 import messenger.event.EventManager;
 import messenger.event.events.TypingEvent;
+import messenger.user.UserDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,11 +13,10 @@ public class SetTyping {
 
     @RequestMapping(value = "/threads/{threadID}/typing", method = RequestMethod.POST)
     public String setTyping(
-            @RequestAttribute("userType") String userType,
-            @RequestAttribute("userID") Long userID,
+            @RequestAttribute("user") UserDescriptor userDescriptor,
             @PathVariable Long threadID
     ) {
-        eventManager.newEvent(new TypingEvent(userType, userID, threadID));
+        eventManager.newEvent(new TypingEvent(userDescriptor, threadID));
         return "";
     }
 }

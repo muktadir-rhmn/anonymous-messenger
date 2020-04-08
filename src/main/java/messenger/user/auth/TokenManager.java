@@ -1,4 +1,4 @@
-package messenger.auth;
+package messenger.user.auth;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -9,6 +9,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import messenger.config.ConfigurationManager;
 import messenger.config.pojos.JWTConfiguration;
+import messenger.db.models.User;
+import messenger.user.UserDescriptor;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -21,9 +23,6 @@ public class TokenManager {
     public static TokenManager getInstance() {
         return instance;
     }
-
-    public static final String USER_TYPE_SINGED_IN = "SIGNED_IN";
-    public static final String USER_TYPE_INITIATOR = "INITIATOR";
 
     private JWTConfiguration configuration;
     private Algorithm signingAlgorithm;
@@ -42,10 +41,9 @@ public class TokenManager {
         try {
             token = JWT.create()
                     .withIssuer(configuration.issuer)
-                    .withClaim("userType", USER_TYPE_SINGED_IN)
-                    .withClaim("userID", userID.toString())
+                    .withClaim("userType", UserDescriptor.USER_TYPE_SINGED_IN)
                     .withClaim("userName", userName)
-                    .withClaim("email", email)
+                    .withClaim("userID", userID)
                     .sign(signingAlgorithm);
         } catch (JWTCreationException exception){
             exception.printStackTrace();
@@ -59,10 +57,10 @@ public class TokenManager {
         try {
             token = JWT.create()
                     .withIssuer(configuration.issuer)
-                    .withClaim("userType", USER_TYPE_INITIATOR)
-                    .withClaim("initiatorName", initiatorName)
-                    .withClaim("threadID", threadID.toString())
-                    .withClaim("userID", userID.toString())
+                    .withClaim("userType", UserDescriptor.USER_TYPE_INITIATOR)
+                    .withClaim("userName", initiatorName)
+                    .withClaim("userID", userID)
+                    .withClaim("threadID", threadID)
                     .sign(signingAlgorithm);
         } catch (JWTCreationException exception){
             exception.printStackTrace();
@@ -71,21 +69,21 @@ public class TokenManager {
         return token;
     }
 
-    public boolean verifyTokenAndSetRequestAttr(String token, HttpServletRequest request) {
-        if (token == null) {
-            return false;
-        }
+    public UserDescriptor verifyTokenAndDecodeData(String token) {
+        if (token == null) return null;
 
         try {
+
             DecodedJWT decodedToken = tokenVerifier.verify(token);
             Map<String, Claim> claimMap = decodedToken.getClaims();
+            String userType = claimMap.get("userType").asString();
+            String userName = claimMap.get("userName").asString();
+            long userID = claimMap.get("userID").asLong();
+            Long threadID = claimMap.getOrDefault("threadID", null).asLong();
 
-            for (String key: claimMap.keySet()) {
-                request.setAttribute(key, claimMap.get(key).asString());
-            }
+            return new UserDescriptor(userType, userName, userID, threadID);
         } catch (JWTCreationException | JWTDecodeException exception){
-            return false;
+            return null;
         }
-        return true;
     }
 }
