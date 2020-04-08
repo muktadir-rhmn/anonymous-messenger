@@ -79,7 +79,10 @@ public class TokenManager {
             String userType = claimMap.get("userType").asString();
             String userName = claimMap.get("userName").asString();
             long userID = claimMap.get("userID").asLong();
-            Long threadID = claimMap.getOrDefault("threadID", null).asLong();
+
+            Long threadID;
+            if (userType.equals(UserDescriptor.USER_TYPE_INITIATOR)) threadID = claimMap.get("threadID").asLong();
+            else threadID = null;
 
             return new UserDescriptor(userType, userName, userID, threadID);
         } catch (JWTCreationException | JWTDecodeException exception){
